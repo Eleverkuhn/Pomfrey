@@ -5,12 +5,10 @@ import psycopg
 from config import Settings
 
 
-class BaseSetupTest(TestCase):
+class TestProjectSetup(TestCase):
     def setUp(self) -> None:
         self.settings = Settings()
 
-
-class TestEnvironment(BaseSetupTest):
     def test_env_variables_loaded(self) -> None:
         self.assertTrue(self.settings.postgres_password)
         self.assertTrue(self.settings.postgres_user)
@@ -18,8 +16,6 @@ class TestEnvironment(BaseSetupTest):
         self.assertTrue(self.settings.postgres_port)
         self.assertTrue(self.settings.postgres_host)
 
-
-class TestPostgreSQL(BaseSetupTest):
     def test_connection(self) -> None:
         conn_params = {
             "dbname": self.settings.postgres_db,
