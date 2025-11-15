@@ -1,35 +1,32 @@
-import os
 from unittest import TestCase
 
 import psycopg
-from dotenv import load_dotenv
+
+from config import Settings
 
 
-class TestEnvironment(TestCase):
+class BaseSetupTest(TestCase):
+    def setUp(self) -> None:
+        self.settings = Settings()
+
+
+class TestEnvironment(BaseSetupTest):
     def test_env_variables_loaded(self) -> None:
-        load_dotenv()
-        postgres_password = os.getenv("POSTGRES_PASSWORD")
-        postgres_user = os.getenv("POSTGRES_USER")
-        postgres_db = os.getenv("POSTGRES_DB")
-        postgres_port = os.getenv("POSTGRES_PORT")
-        postgres_host = os.getenv("POSTGRES_HOST")
-
-        self.assertTrue(postgres_password)
-        self.assertTrue(postgres_user)
-        self.assertTrue(postgres_db)
-        self.assertTrue(postgres_port)
-        self.assertTrue(postgres_host)
+        self.assertTrue(self.settings.postgres_password)
+        self.assertTrue(self.settings.postgres_user)
+        self.assertTrue(self.settings.postgres_db)
+        self.assertTrue(self.settings.postgres_port)
+        self.assertTrue(self.settings.postgres_host)
 
 
-class TestPostgreSQL(TestCase):
+class TestPostgreSQL(BaseSetupTest):
     def test_connection(self) -> None:
-        load_dotenv()
         conn_params = {
-            "dbname": os.getenv("POSTGRES_DB"),
-            "user": os.getenv("POSTGRES_USER"),
-            "password": os.getenv("POSTGRES_PASSWORD"),
-            "host": os.getenv("POSTGRES_HOST"),
-            "port": os.getenv("POSTGRES_PORT")
+            "dbname": self.settings.postgres_db,
+            "user": self.settings.postgres_user,
+            "password": self.settings.postgres_password,
+            "host": self.settings.postgres_host,
+            "port": self.settings.postgres_port
         }
         with psycopg.connect(**conn_params) as conn:
             with conn.cursor() as cur:
