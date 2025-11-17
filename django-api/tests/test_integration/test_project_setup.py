@@ -1,10 +1,11 @@
-import logging, requests
+import requests
 from unittest import TestCase
 
 import psycopg
 
 from config import settings
-from utils import BaseDatabaseTest, LoggingConfig
+from logger.setup import LoggingConfig
+from utils import BaseDatabaseTest
 
 
 class TestProjectSetup(TestCase, BaseDatabaseTest):
@@ -37,10 +38,34 @@ class TestProjectSetup(TestCase, BaseDatabaseTest):
 
 
 class TestLoggingConfig(TestCase):
+    def setUp(self) -> None:
+        self.logger_config = LoggingConfig()
+        self.logger = self.logger_config.get_logger()
+        self.test_log_message = "test"
+
     def test_logger_config_file_is_loaded(self) -> None:
-        config = LoggingConfig().get()
+        config = self.logger_config.load()
         self.assertTrue(config)
 
-    def test_logger_output_debug_messages_to_console(self) -> None:
-        logger = logging.getLogger("pomfrey")
-        self.assertTrue(logger)
+    def test_logger_outputs_info_messages_to_logs_info(self) -> None:
+        self.logger.info(self.test_log_message)
+        self._find_log_message("logs/info.log")
+
+    def test_logger_outputs_warning_messages_to_logs_warning(self) -> None:
+        self.logger.warning(self.test_log_message)
+        self._find_log_message("logs/warnings.log")
+
+    def test_logger_outputs_debug_messages_to_console(self) -> None:
+        with self.assertLogs(self.logger, level="DEBUG") as cm:
+            self.logger.debug(self.test_log_message)
+        self._find_log_message_in_source(cm.output)
+
+    def _find_log_message(self, log_file: str) -> None:
+        self._read_log_file(log_file)
+
+    def _read_log_file(self, path: str) -> None:
+        with open(path) as log_file:
+            self._find_log_message_in_source(log_file)
+
+    def _find_log_message_in_source(self, source) -> None:
+        self.assertTrue(any(self.test_log_message in msg for msg in source))

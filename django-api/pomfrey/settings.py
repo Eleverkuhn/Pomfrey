@@ -14,7 +14,7 @@ import logging.config
 from pathlib import Path
 
 from config import settings
-from utils import LoggingConfig
+from logger.setup import LoggingConfig
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -129,5 +129,5 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # logging
-logging_config = LoggingConfig().get()
+logging_config = LoggingConfig().load()
 logging.config.dictConfig(logging_config)

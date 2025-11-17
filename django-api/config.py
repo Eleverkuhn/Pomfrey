@@ -4,8 +4,6 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 env_path = str(Path(__file__).parent.parent / ".env")
 
-print(f"ENV PATH: {env_path}")
-
 
 class Settings(BaseSettings):
     postgres_user: str
