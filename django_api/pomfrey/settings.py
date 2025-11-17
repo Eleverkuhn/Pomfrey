@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'api'
 ]
 
 MIDDLEWARE = [
@@ -132,3 +133,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # logging
 logging_config = LoggingConfig().load()
 logging.config.dictConfig(logging_config)
+
+# auth
+AUTH_USER_MODEL = "api.Customer"
