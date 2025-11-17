@@ -13,4 +13,5 @@ dependencies = [
   "requests==2.32.5",
   "djangorestframework==3.16.1",
   "python-nanoid==2.0.0",
+  "django-rest-knox==5.0.2"
 ]

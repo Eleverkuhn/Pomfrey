@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 import logging.config
+from datetime import timedelta
 from pathlib import Path
 
 from config import settings
@@ -41,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'knox',
     'api'
 ]
 
@@ -136,3 +138,15 @@ logging.config.dictConfig(logging_config)
 
 # auth
 AUTH_USER_MODEL = "api.Customer"
+
+# REST framework
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'knox.auth.TokenAuthentication',
+    ],
+}
+
+REST_KNOX = {
+    "TOKEN_TTL": timedelta(days=7),
+    "USER_SERIALIZER": "api.serializers.UserSerializer"
+}
