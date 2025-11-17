@@ -12,3 +12,6 @@ wheels/
 
 # UV
 .python-version
+
+# logs
+logs/

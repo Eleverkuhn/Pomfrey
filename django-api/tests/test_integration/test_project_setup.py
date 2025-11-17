@@ -1,10 +1,10 @@
-import requests
+import logging, requests
 from unittest import TestCase
 
 import psycopg
 
 from config import settings
-from utils import BaseDatabaseTest
+from utils import BaseDatabaseTest, LoggingConfig
 
 
 class TestProjectSetup(TestCase, BaseDatabaseTest):
@@ -34,3 +34,13 @@ class TestProjectSetup(TestCase, BaseDatabaseTest):
             self.assertEqual(response.status_code, 200)
         except requests.exceptions.RequestException as exc:
             self.fail(f"Django server not reachable: {exc}")
+
+
+class TestLoggingConfig(TestCase):
+    def test_logger_config_file_is_loaded(self) -> None:
+        config = LoggingConfig().get()
+        self.assertTrue(config)
+
+    def test_logger_output_debug_messages_to_console(self) -> None:
+        logger = logging.getLogger("pomfrey")
+        self.assertTrue(logger)
