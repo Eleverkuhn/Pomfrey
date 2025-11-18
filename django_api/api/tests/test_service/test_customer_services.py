@@ -1,15 +1,14 @@
-from unittest import TestCase
-
 from rest_framework.validators import ValidationError
 
+from utils import BaseRegistryTest
+from logger.setup import LoggingConfig
 from api.service.customer_services import RegistryService
 from api.data.customer_data import Customer
-from logger.setup import LoggingConfig
 
 
-class TestRegistryService(TestCase):
+class TestRegistryService(BaseRegistryTest):
     def setUp(self) -> None:
-        self.data = {"email": "test@example.com", "password": "test"}
+        super().setUp()
         self.service = RegistryService(self.data)
 
     def test_exec_creates_new_customer(self) -> None:
