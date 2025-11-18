@@ -2,6 +2,7 @@ import requests
 from unittest import TestCase
 
 import psycopg
+from django.urls import reverse
 
 from config import settings
 from logger.setup import LoggingConfig
