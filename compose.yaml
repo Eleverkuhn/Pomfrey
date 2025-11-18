@@ -34,7 +34,11 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    command: python manage.py runserver ${DJANGO_HOST}:${DJANGO_PORT}
+    command: bash -c "
+      python manage.py migrate
+      &&
+      python manage.py runserver ${DJANGO_HOST}:${DJANGO_PORT}
+      "
     ports:
       - "${DJANGO_PORT}:8000"
     networks:
