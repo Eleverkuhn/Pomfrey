@@ -5,7 +5,7 @@ from django.db.utils import OperationalError
 from utils import BaseDatabaseTest
 
 
-class DatabaseTestCase(TestCase, BaseDatabaseTest):
+class TestDatabaseConnection(TestCase, BaseDatabaseTest):
     def test_database_connection(self) -> None:
         try:
             connections['default'].cursor()
