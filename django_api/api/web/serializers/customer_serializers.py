@@ -1,7 +1,14 @@
+from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator, ValidationError
 
+from logger.setup import LoggingConfig
 from api.data.customer_data import Customer
+
+
+class BuiltInPasswordValidator:
+    def __call__(self, value) -> None:
+        validate_password(value)
 
 
 class PasswordMatchesValidator:
@@ -14,6 +21,7 @@ class PasswordMatchesValidator:
         password = confirm_password_field.parent.initial_data.get(
             self.password_field
         )
+        LoggingConfig().logger.debug(password)
         if not self._compare_passwords(password, value):
             self._raise_validation_err()
 
@@ -47,7 +55,10 @@ class RegistrySerializer(serializers.Serializer):
     email = serializers.EmailField(
         validators=[UniqueValidator(Customer.objects.all())]
     )
-    password = serializers.CharField(write_only=True)
+    password = serializers.CharField(
+        write_only=True,
+        validators=[BuiltInPasswordValidator()]
+    )
     confirm_password = serializers.CharField(
         write_only=True,
         required=True,

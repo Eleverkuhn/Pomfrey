@@ -17,6 +17,6 @@ class BaseRegistryTest(TestCase):
     def setUp(self) -> None:
         self.data = {
             "email": "test@example.com",
-            "password": "test",
-            "confirm_password": "test"
+            "password": "ComplicatedP@sSw0rd",
+            "confirm_password": "ComplicatedP@sSw0rd"
         }
