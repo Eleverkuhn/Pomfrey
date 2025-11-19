@@ -22,17 +22,20 @@ class PasswordMatchesValidator:
             self.password_field
         )
         LoggingConfig().logger.debug(password)
-        if not self._compare_passwords(password, value):
-            self._raise_validation_err()
+        if not self.compare_passwords(password, value):
+            self.raise_validation_err()
 
-    def _compare_passwords(
+    def compare_passwords(
             self, base_password: str, password_to_compare: str
     ) -> bool:
         return base_password == password_to_compare
 
-    def _raise_validation_err(self) -> None:
-        message = "Passwords don't match"
-        raise ValidationError(message)
+    def raise_validation_err(self) -> None:
+        raise ValidationError(self.get_error_message())
+
+    def get_error_message(self) -> str:
+        error_message = "Passwords do not match"
+        return error_message
 
 
 class CustomerSerializer(serializers.ModelSerializer):
