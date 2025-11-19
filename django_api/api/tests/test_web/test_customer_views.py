@@ -90,7 +90,6 @@ class TestLogin(BaseLoginTest, UtilsTest):
     def setUp(self) -> None:
         super().setUp()
         self.url = reverse("login")
-        self.customer = self._create_customer()
 
     def test_returns_200_on_succeed(self) -> None:
         response = self.client.post(self.url, self.data)

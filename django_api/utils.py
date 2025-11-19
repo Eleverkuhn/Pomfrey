@@ -27,6 +27,14 @@ class UtilsTest:
         return customer
 
 
+class BaseAuthTest(TestCase):
+    def setUp(self) -> None:
+        self.data = {
+            "email": f"test_{self._testMethodName}@example.com",
+            "password": "ComplicatedP@sSw0rd",
+        }
+
+
 class BaseTestService(UtilsTest):
     service_class: type[BaseService]
 
@@ -35,15 +43,13 @@ class BaseTestService(UtilsTest):
         self.service = self.service_class(self.data)
 
 
-class BaseLoginTest(TestCase):
+class BaseLoginTest(BaseAuthTest, UtilsTest):
     def setUp(self) -> None:
-        self.data = {
-            "email": f"test_{self._testMethodName}@example.com",
-            "password": "ComplicatedP@sSw0rd",
-        }
+        super().setUp()
+        self.customer = self._create_customer()
 
 
-class BaseRegistryTest(BaseLoginTest):
+class BaseRegistryTest(BaseAuthTest):
     def setUp(self) -> None:
         super().setUp()
         self.data.update({"confirm_password": self.data.get("password")})

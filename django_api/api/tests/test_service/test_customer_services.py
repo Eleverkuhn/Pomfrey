@@ -35,10 +35,10 @@ class TestRegistryService(BaseTestService, BaseRegistryTest):
 class TestLoginService(BaseTestService, BaseLoginTest):
     service_class = LoginService
 
-    @override
-    def setUp(self) -> None:
-        super().setUp()
-        self.customer = self._create_customer()
+    # @override
+    # def setUp(self) -> None:
+    #     super().setUp()
+    #     self.customer = self._create_customer()
 
     def test_exec_returns_email_with_auth_token(self) -> None:
         response_data = self.service.exec()
