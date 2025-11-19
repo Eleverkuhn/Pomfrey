@@ -1,4 +1,5 @@
 import json
+from typing import override
 
 from django.urls import reverse
 from django.contrib.auth.password_validation import (
@@ -11,14 +12,15 @@ from utils import (
     BaseTestWithCreatedCustomer,
     BaseTestWithAuthenticationHeader,
     BaseRegistryTest,
-    UtilsTest
+    UtilsTest,
+    BaseLogoutTest
 )
-from logger.setup import LoggingConfig
 from api.data.customer_data import Customer
 from api.web.serializers.customer_serializers import PasswordMatchesValidator
 
 
 class BaseRegistryViewTest(BaseRegistryTest):
+    @override
     def setUp(self) -> None:
         super().setUp()
         self.url = reverse("registry")
@@ -36,9 +38,6 @@ class TestRegistry(BaseRegistryViewTest):
 
 
 class TestValidationErrorRender(BaseRegistryViewTest):
-    def setUp(self) -> None:
-        super().setUp()
-
     def test_returns_validation_err_msg_for_short_password(self) -> None:
         self._validation_err_msg_in_response_content(
             "1", MinimumLengthValidator()
@@ -93,6 +92,7 @@ class TestValidationErrorRender(BaseRegistryViewTest):
 
 
 class TestLogin(BaseTestWithCreatedCustomer, UtilsTest):
+    @override
     def setUp(self) -> None:
         super().setUp()
         self.url = reverse("login")
@@ -114,6 +114,7 @@ class TestLogin(BaseTestWithCreatedCustomer, UtilsTest):
 
 
 class TestCustomerPage(BaseTestWithAuthenticationHeader):
+    @override
     def setUp(self) -> None:
         super().setUp()
         self.url = reverse("my")
@@ -127,3 +128,47 @@ class TestCustomerPage(BaseTestWithAuthenticationHeader):
             self.url, HTTP_AUTHORIZATION=self.auth_header
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+class TestLogout(BaseTestWithAuthenticationHeader, BaseLogoutTest):
+    @override
+    def setUp(self) -> None:
+        super().setUp()
+        self.url = reverse("logout")
+
+    def test_logout_works_as_expected(self) -> None:
+        my_url = reverse("my")
+        self._check_auth_token_is_valid(my_url, self.auth_header)
+        self.client.post(self.url, HTTP_AUTHORIZATION=self.auth_header)
+        self._check_token_is_removed(my_url, self.auth_header)
+
+
+class TestLogoutAll(BaseTestWithCreatedCustomer, BaseLogoutTest):
+    @override
+    def setUp(self) -> None:
+        super().setUp()
+        self.url = reverse("logout_all")
+
+    def test_logout_all_works_as_expected(self) -> None:
+        auth_tokens = self._create_multiple_auth_tokens()
+        self._check_all_auth_tokens_are_valid(auth_tokens)
+
+        self.client.post(self.url, HTTP_AUTHORIZATION=auth_tokens[0])
+
+        self._check_all_auth_tokens_are_removed(auth_tokens)
+
+    def _create_multiple_auth_tokens(self) -> list[str]:
+        auth_tokens = [self._create_auth_header() for _ in range(5)]
+        return auth_tokens
+
+    def _check_all_auth_tokens_are_valid(
+            self, auth_tokens: list[str]
+    ) -> None:
+        for token in auth_tokens:
+            self._check_auth_token_is_valid(reverse("my"), token)
+
+    def _check_all_auth_tokens_are_removed(
+            self, auth_tokens: list[str]
+    ) -> None:
+        for token in auth_tokens:
+            self._check_token_is_removed(reverse("my"), token)

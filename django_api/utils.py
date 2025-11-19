@@ -5,6 +5,7 @@ This module provides various utilities for the project purposes
 from typing import override
 
 from django.test import TestCase
+from rest_framework import status
 from psycopg import Cursor
 from knox.models import AuthToken
 
@@ -29,6 +30,11 @@ class UtilsTest:
         customer.save()
         return customer
 
+    def _create_auth_header(self) -> str:
+        auth_token = AuthToken.objects.create(self.customer)[1]
+        auth_header = f"Token {auth_token}"
+        return auth_header
+
 
 class BaseAuthTest(TestCase):
     def setUp(self) -> None:
@@ -49,8 +55,7 @@ class BaseTestWithAuthenticationHeader(BaseTestWithCreatedCustomer):
     @override
     def setUp(self) -> None:
         super().setUp()
-        self.token = AuthToken.objects.create(self.customer)[1]
-        self.auth_header = f"Token {self.token}"
+        self.auth_header = self._create_auth_header()
 
 
 class BaseTestService(UtilsTest):
@@ -65,3 +70,13 @@ class BaseRegistryTest(BaseAuthTest):
     def setUp(self) -> None:
         super().setUp()
         self.data.update({"confirm_password": self.data.get("password")})
+
+
+class BaseLogoutTest(UtilsTest):
+    def _check_auth_token_is_valid(self, url: str, auth_header: str) -> None:
+        response = self.client.get(url, HTTP_AUTHORIZATION=auth_header)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def _check_token_is_removed(self, url: str, auth_header: str) -> None:
+        response = self.client.get(url, HTTP_AUTHORIZATION=auth_header)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
