@@ -86,7 +86,10 @@ DATABASES = {
         'USER': settings.postgres_user,
         'PASSWORD': settings.postgres_password,
         'HOST': settings.postgres_host,
-        'PORT': settings.postgres_port
+        'PORT': settings.postgres_port,
+        'TEST': {
+            'NAME': None,
+        },
     }
 }
 
