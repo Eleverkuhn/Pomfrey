@@ -13,10 +13,15 @@ class BaseDatabaseTest:
         self.assertEqual(row[0], 1)
 
 
-class BaseRegistryTest(TestCase):
+class BaseLoginTest(TestCase):
     def setUp(self) -> None:
         self.data = {
             "email": "test@example.com",
             "password": "ComplicatedP@sSw0rd",
-            "confirm_password": "ComplicatedP@sSw0rd"
         }
+
+
+class BaseRegistryTest(BaseLoginTest):
+    def setUp(self) -> None:
+        super().setUp()
+        self.data.update({"confirm_password": self.data.get("password")})
