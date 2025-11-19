@@ -54,7 +54,7 @@ class CustomerSerializer(serializers.ModelSerializer):
         return customer
 
 
-class RegistrySerializer(serializers.Serializer):
+class LoginSeralizer(serializers.Serializer):
     email = serializers.EmailField(
         validators=[UniqueValidator(Customer.objects.all())]
     )
@@ -62,6 +62,9 @@ class RegistrySerializer(serializers.Serializer):
         write_only=True,
         validators=[BuiltInPasswordValidator()]
     )
+
+
+class RegistrySerializer(LoginSeralizer):
     confirm_password = serializers.CharField(
         write_only=True,
         required=True,
