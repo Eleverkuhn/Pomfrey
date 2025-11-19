@@ -1,5 +1,3 @@
-from typing import override
-
 from rest_framework.validators import ValidationError
 
 from utils import BaseLoginTest, BaseRegistryTest, BaseTestService
@@ -34,11 +32,6 @@ class TestRegistryService(BaseTestService, BaseRegistryTest):
 
 class TestLoginService(BaseTestService, BaseLoginTest):
     service_class = LoginService
-
-    # @override
-    # def setUp(self) -> None:
-    #     super().setUp()
-    #     self.customer = self._create_customer()
 
     def test_exec_returns_email_with_auth_token(self) -> None:
         response_data = self.service.exec()
