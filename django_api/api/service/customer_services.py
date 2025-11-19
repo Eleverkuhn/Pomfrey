@@ -1,4 +1,4 @@
-from rest_framework.serializers import ValidationError
+from django.contrib.auth import authenticate
 from knox.models import AuthToken
 
 from logger.setup import LoggingConfig
@@ -42,34 +42,12 @@ class LoginService(BaseService):
 
     def _get_customer(self) -> Customer:
         validated_data = self.validate()
-        LoggingConfig().logger.debug(validated_data)
-        customer = CustomerService(**validated_data).get()
+        customer = authenticate(
+            email=validated_data.get("email"),
+            password=validated_data.get("password")
+        )
         return customer
 
     def _create_token(self, customer: Customer) -> AuthToken:
         token = AuthToken.objects.create(customer)[1]
         return token
-
-
-class CustomerService:
-    def __init__(self, email: str, password: str) -> None:
-        self.email = email
-        self.password = password
-
-    def get(self) -> Customer:
-        customer = self._check_customer_exists(self.email)
-        self._check_customer_password(customer, self.password)
-        return customer
-
-    def _check_customer_exists(self, email: str) -> Customer:
-        try:
-            customer = Customer.objects.get(email=email)
-        except Customer.DoesNotExist:
-            raise ValidationError({"email": "User does not exist"})
-        return customer
-
-    def _check_customer_password(
-            self, customer: Customer, password: str
-    ) -> None:
-        if not customer.check_password(password):
-            raise ValidationError({"password": "Invalid password"})
