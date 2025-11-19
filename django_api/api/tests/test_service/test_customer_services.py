@@ -1,15 +1,31 @@
+from typing import override
+
 from rest_framework.validators import ValidationError
 
-from utils import BaseRegistryTest
+from utils import BaseLoginTest, BaseRegistryTest
 from logger.setup import LoggingConfig
-from api.service.customer_services import RegistryService
+from api.service.customer_services import (
+    BaseService, RegistryService, LoginService
+)
 from api.data.customer_data import Customer
 
 
-class TestRegistryService(BaseRegistryTest):
+class BaseTestService:
+    service_class: type[BaseService]
+
     def setUp(self) -> None:
         super().setUp()
-        self.service = RegistryService(self.data)
+        self.service = self.service_class(self.data)
+
+    def _create_customer(self) -> Customer:
+        customer = Customer(email=self.data.get("email"))
+        customer.set_password(self.data.get("password"))
+        customer.save()
+        return customer
+
+
+class TestRegistryService(BaseTestService, BaseRegistryTest):
+    service_class = RegistryService
 
     def test_exec_creates_new_customer(self) -> None:
         email = self.data.get("email")
@@ -26,10 +42,21 @@ class TestRegistryService(BaseRegistryTest):
         LoggingConfig().get_logger().debug(validated_data)
 
     def test_validation_fails_for_non_unique_email(self) -> None:
-        Customer.objects.create(
-            email=self.data.get("email"),
-            password=self.data.get("password")
-        )
+        self._create_customer()
         with self.assertRaises(ValidationError) as cm:
             self.service.validate()
         self.assertTrue(cm.exception.get_full_details().get("email"))
+
+
+class TestLoginService(BaseTestService, BaseLoginTest):
+    service_class = LoginService
+
+    @override
+    def setUp(self) -> None:
+        super().setUp()
+        self.customer = self._create_customer()
+
+    def test_exec_returns_email_with_auth_token(self) -> None:
+        response_data = self.service.exec()
+        self.assertEqual(response_data.get("email"), self.data.get("email"))
+        self.assertTrue(response_data.get("token"))
