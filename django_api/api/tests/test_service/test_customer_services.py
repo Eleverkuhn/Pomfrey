@@ -2,26 +2,10 @@ from typing import override
 
 from rest_framework.validators import ValidationError
 
-from utils import BaseLoginTest, BaseRegistryTest
+from utils import BaseLoginTest, BaseRegistryTest, BaseTestService
 from logger.setup import LoggingConfig
-from api.service.customer_services import (
-    BaseService, RegistryService, LoginService
-)
+from api.service.customer_services import RegistryService, LoginService
 from api.data.customer_data import Customer
-
-
-class BaseTestService:
-    service_class: type[BaseService]
-
-    def setUp(self) -> None:
-        super().setUp()
-        self.service = self.service_class(self.data)
-
-    def _create_customer(self) -> Customer:
-        customer = Customer(email=self.data.get("email"))
-        customer.set_password(self.data.get("password"))
-        customer.save()
-        return customer
 
 
 class TestRegistryService(BaseTestService, BaseRegistryTest):

@@ -1,4 +1,4 @@
-from rest_framework.serializers import Serializer, ValidationError
+from rest_framework.serializers import ValidationError
 from knox.models import AuthToken
 
 from logger.setup import LoggingConfig
@@ -6,22 +6,23 @@ from api.web.serializers.customer_serializers import (
     RegistrySerializer, CustomerSerializer, LoginSeralizer
 )
 from api.data.customer_data import Customer
+from api.service.base_services import BaseService
 
 
-class BaseService:
-    serializer_class: type[Serializer]
-
-    def __init__(self, request_data: dict) -> None:
-        self.request_data = request_data
-
-    @property
-    def serializer(self):
-        return self.serializer_class(data=self.request_data)
-
-    def validate(self) -> dict:
-        serializer = self.serializer
-        if serializer.is_valid(raise_exception=True):
-            return serializer.validated_data
+# class BaseService:
+#     serializer_class: type[Serializer]
+# 
+#     def __init__(self, request_data: dict) -> None:
+#         self.request_data = request_data
+# 
+#     @property
+#     def serializer(self):
+#         return self.serializer_class(data=self.request_data)
+# 
+#     def validate(self) -> dict:
+#         serializer = self.serializer
+#         if serializer.is_valid(raise_exception=True):
+#             return serializer.validated_data
 
 
 class RegistryService(BaseService):
@@ -79,7 +80,7 @@ class CustomerService:
     def _check_customer_exists(self, email: str) -> Customer:
         try:
             customer = Customer.objects.get(email=email)
-        except Customer.DoesNotExsit:
+        except Customer.DoesNotExist:
             raise ValidationError({"email": "User does not exist"})
         return customer
 
