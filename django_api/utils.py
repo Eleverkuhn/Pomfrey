@@ -2,8 +2,11 @@
 This module provides various utilities for the project purposes
 """
 
+from typing import override
+
 from django.test import TestCase
 from psycopg import Cursor
+from knox.models import AuthToken
 
 from api.service.base_services import BaseService
 from api.data.customer_data import Customer
@@ -33,6 +36,21 @@ class BaseAuthTest(TestCase):
             "email": f"test_{self._testMethodName}@example.com",
             "password": "ComplicatedP@sSw0rd",
         }
+
+
+class BaseTestWithCreatedCustomer(BaseAuthTest, UtilsTest):  # REF: merge this wuth BaseLoginTest
+    @override
+    def setUp(self) -> None:
+        super().setUp()
+        self.customer = self._create_customer()
+
+
+class BaseTestWithAuthenticationHeader(BaseTestWithCreatedCustomer):
+    @override
+    def setUp(self) -> None:
+        super().setUp()
+        self.token = AuthToken.objects.create(self.customer)[1]
+        self.auth_header = f"Token {self.token}"
 
 
 class BaseTestService(UtilsTest):

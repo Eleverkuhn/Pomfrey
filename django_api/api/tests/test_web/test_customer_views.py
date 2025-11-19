@@ -4,9 +4,15 @@ from django.urls import reverse
 from django.contrib.auth.password_validation import (
     MinimumLengthValidator, CommonPasswordValidator, NumericPasswordValidator
 )
+from rest_framework import status
 from rest_framework.response import Response
 
-from utils import BaseLoginTest, BaseRegistryTest, UtilsTest
+from utils import (
+    BaseTestWithAuthenticationHeader,
+    BaseLoginTest,
+    BaseRegistryTest,
+    UtilsTest
+)
 from logger.setup import LoggingConfig
 from api.data.customer_data import Customer
 from api.web.serializers.customer_serializers import PasswordMatchesValidator
@@ -21,7 +27,7 @@ class BaseRegistryViewTest(BaseRegistryTest):
 class TestRegistry(BaseRegistryViewTest):
     def test_returns_201_created_on_success(self) -> None:
         response = self.client.post(self.url, data=self.data)
-        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_creates_customer(self) -> None:
         self.client.post(self.url, data=self.data)
@@ -93,7 +99,7 @@ class TestLogin(BaseLoginTest, UtilsTest):
 
     def test_returns_200_on_succeed(self) -> None:
         response = self.client.post(self.url, self.data)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_returns_user_with_token(self) -> None:
         response = self.client.post(self.url, self.data)
@@ -105,3 +111,19 @@ class TestLogin(BaseLoginTest, UtilsTest):
         decoded_response = response.content.decode("utf-8")
         content = json.loads(decoded_response)
         return content
+
+
+class TestCustomerPage(BaseTestWithAuthenticationHeader):
+    def setUp(self) -> None:
+        super().setUp()
+        self.url = reverse("my")
+
+    def test_returns_401_unauthorized_for_unlogged_in_customer(self) -> None:
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_returns_200_OK_for_logged_in_customer(self) -> None:
+        response = self.client.get(
+            self.url, HTTP_AUTHORIZATION=self.auth_header
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
