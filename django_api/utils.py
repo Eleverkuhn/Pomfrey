@@ -38,7 +38,7 @@ class BaseAuthTest(TestCase):
         }
 
 
-class BaseTestWithCreatedCustomer(BaseAuthTest, UtilsTest):  # REF: merge this wuth BaseLoginTest
+class BaseTestWithCreatedCustomer(BaseAuthTest, UtilsTest):
     @override
     def setUp(self) -> None:
         super().setUp()
@@ -59,12 +59,6 @@ class BaseTestService(UtilsTest):
     def setUp(self) -> None:
         super().setUp()
         self.service = self.service_class(self.data)
-
-
-class BaseLoginTest(BaseAuthTest, UtilsTest):
-    def setUp(self) -> None:
-        super().setUp()
-        self.customer = self._create_customer()
 
 
 class BaseRegistryTest(BaseAuthTest):

@@ -8,8 +8,8 @@ from rest_framework import status
 from rest_framework.response import Response
 
 from utils import (
+    BaseTestWithCreatedCustomer,
     BaseTestWithAuthenticationHeader,
-    BaseLoginTest,
     BaseRegistryTest,
     UtilsTest
 )
@@ -92,7 +92,7 @@ class TestValidationErrorRender(BaseRegistryViewTest):
         return response_content
 
 
-class TestLogin(BaseLoginTest, UtilsTest):
+class TestLogin(BaseTestWithCreatedCustomer, UtilsTest):
     def setUp(self) -> None:
         super().setUp()
         self.url = reverse("login")

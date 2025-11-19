@@ -1,6 +1,10 @@
 from rest_framework.validators import ValidationError
 
-from utils import BaseLoginTest, BaseRegistryTest, BaseTestService
+from utils import (
+    BaseTestWithCreatedCustomer,
+    BaseRegistryTest,
+    BaseTestService
+)
 from logger.setup import LoggingConfig
 from api.service.customer_services import RegistryService, LoginService
 from api.data.customer_data import Customer
@@ -30,7 +34,7 @@ class TestRegistryService(BaseTestService, BaseRegistryTest):
         self.assertTrue(cm.exception.get_full_details().get("email"))
 
 
-class TestLoginService(BaseTestService, BaseLoginTest):
+class TestLoginService(BaseTestService, BaseTestWithCreatedCustomer):
     service_class = LoginService
 
     def test_exec_returns_email_with_auth_token(self) -> None:
