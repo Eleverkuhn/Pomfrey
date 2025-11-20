@@ -39,15 +39,15 @@ class UtilsTest:
 
 class BaseAuthTest(TestCase):
     def setUp(self) -> None:
-        self.customer_generator = TestCustomerGenerator()
-        self.data = self.customer_generator.generate_login_data()
+        self.customer_test_data = CustomerTestData()
+        self.data = self.customer_test_data.generate_login_data()
 
 
 class BaseTestWithCreatedCustomer(BaseAuthTest, UtilsTest):
     @override
     def setUp(self) -> None:
         super().setUp()
-        self.customer = self.customer_generator.generate_customer()
+        self.customer = self.customer_test_data.generate_customer(self.data)
 
 
 class BaseTestWithAuthenticationHeader(BaseTestWithCreatedCustomer):
@@ -88,34 +88,6 @@ class BaseViewTest:
         return content
 
 
-class TestCustomerGenerator:
-    def __init__(self) -> None:
-        self.faker = Faker()
-
-    def generate_customer(self) -> Customer:
-        customer = self._create_customer()
-        return customer
-
-    def generate_login_data(self) -> dict[str, str]:
-        self.login_data = {
-            "email": self.faker.email(),
-            "password": self.faker.password(
-                length=10,
-                special_chars=True,
-                digits=True,
-                upper_case=True,
-                lower_case=True
-            )
-        }
-        return self.login_data
-
-    def _create_customer(self) -> Customer:
-        customer = Customer(email=self.login_data.get("email"))
-        customer.set_password(self.login_data.get("password"))
-        customer.save()
-        return customer
-
-
 class BaseOrderTest(BaseTestWithCreatedCustomer):
     @override
     def setUp(self) -> None:
@@ -143,4 +115,50 @@ class BaseOrderTest(BaseTestWithCreatedCustomer):
         return pharmacy_address
 
     def _cretat_products(self) -> None:
+        pass
+
+
+class CustomerTestData:
+    def __init__(self) -> None:
+        self.faker = Faker()
+
+    def generate_customer(
+            self, login_data: dict[str, str] | None = None
+    ) -> Customer:
+        login_data = self._generate_login_data_if_not_provided(login_data)
+        customer = self._create_customer(login_data)
+        return customer
+
+    def _generate_login_data_if_not_provided(
+            self, login_data: dict[str, str] | None
+    ) -> dict[str, str]:
+        if not login_data:
+            login_data = self.generate_login_data()
+        return login_data
+
+    def generate_login_data(self) -> dict[str, str]:
+        login_data = {
+            "email": self.faker.email(),
+            "password": self.faker.password(
+                length=10,
+                special_chars=True,
+                digits=True,
+                upper_case=True,
+                lower_case=True
+            )
+        }
+        return login_data
+
+    def _create_customer(self, login_data: dict[str, str]) -> Customer:
+        customer = Customer(email=login_data.get("email"))
+        customer.set_password(login_data.get("password"))
+        customer.save()
+        return customer
+
+
+class PharmacyTestData:
+    def __init__(self, locale_code: str = "en_US") -> None:
+        self.faker = Faker(locale_code)
+
+    def generate_pharamacy_address(self) -> Pharmacy:
         pass
