@@ -47,7 +47,7 @@ class BaseTestWithCreatedCustomer(BaseAuthTest, UtilsTest):
     @override
     def setUp(self) -> None:
         super().setUp()
-        self.customer = self.customer_test_data.generate_customer(self.data)
+        self.customer = self.customer_test_data.create_customer(self.data)
 
 
 class BaseTestWithAuthenticationHeader(BaseTestWithCreatedCustomer):
@@ -122,11 +122,11 @@ class CustomerTestData:
     def __init__(self) -> None:
         self.faker = Faker()
 
-    def generate_customer(
+    def create_customer(
             self, login_data: dict[str, str] | None = None
     ) -> Customer:
         login_data = self._generate_login_data_if_not_provided(login_data)
-        customer = self._create_customer(login_data)
+        customer = self._create_customer_in_db(login_data)
         return customer
 
     def _generate_login_data_if_not_provided(
@@ -149,7 +149,7 @@ class CustomerTestData:
         }
         return login_data
 
-    def _create_customer(self, login_data: dict[str, str]) -> Customer:
+    def _create_customer_in_db(self, login_data: dict[str, str]) -> Customer:
         customer = Customer(email=login_data.get("email"))
         customer.set_password(login_data.get("password"))
         customer.save()
