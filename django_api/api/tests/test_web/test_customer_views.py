@@ -1,4 +1,3 @@
-import json
 from typing import override
 
 from django.urls import reverse
@@ -6,14 +5,13 @@ from django.contrib.auth.password_validation import (
     MinimumLengthValidator, CommonPasswordValidator, NumericPasswordValidator
 )
 from rest_framework import status
-from rest_framework.response import Response
 
 from utils import (
     BaseTestWithCreatedCustomer,
     BaseTestWithAuthenticationHeader,
     BaseRegistryTest,
-    UtilsTest,
-    BaseLogoutTest
+    BaseLogoutTest,
+    BaseViewTest
 )
 from api.data.customer_data import Customer
 from api.web.serializers.customer_serializers import PasswordMatchesValidator
@@ -91,7 +89,7 @@ class TestValidationErrorRender(BaseRegistryViewTest):
         return response_content
 
 
-class TestLogin(BaseTestWithCreatedCustomer, UtilsTest):
+class TestLogin(BaseTestWithCreatedCustomer, BaseViewTest):
     @override
     def setUp(self) -> None:
         super().setUp()
@@ -103,14 +101,9 @@ class TestLogin(BaseTestWithCreatedCustomer, UtilsTest):
 
     def test_returns_user_with_token(self) -> None:
         response = self.client.post(self.url, self.data)
-        response_content = self._get_response_content(response)
+        response_content = self._convert_response_to_json(response)
         self.assertEqual(response_content.get("email"), self.data.get("email"))
         self.assertTrue(response_content.get("token"))
-
-    def _get_response_content(self, response: Response) -> dict:
-        decoded_response = response.content.decode("utf-8")
-        content = json.loads(decoded_response)
-        return content
 
 
 class TestCustomerPage(BaseTestWithAuthenticationHeader):

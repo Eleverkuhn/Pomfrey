@@ -2,10 +2,12 @@
 This module provides various utilities for the project purposes
 """
 
+import json
 from typing import override
 
 from django.test import TestCase
 from rest_framework import status
+from rest_framework.response import Response
 from psycopg import Cursor
 from knox.models import AuthToken
 
@@ -80,3 +82,10 @@ class BaseLogoutTest(UtilsTest):
     def _check_token_is_removed(self, url: str, auth_header: str) -> None:
         response = self.client.get(url, HTTP_AUTHORIZATION=auth_header)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class BaseViewTest:
+    def _convert_response_to_json(self, response: Response) -> dict:
+        decoded_response = response.content.decode("utf-8")
+        content = json.loads(decoded_response)
+        return content
