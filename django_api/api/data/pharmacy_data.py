@@ -1,3 +1,5 @@
+from typing import override
+
 from django.db import models
 
 from api.data.base_data import FieldDefault
@@ -12,6 +14,14 @@ class PharmacyAddress(models.Model):
 
     class Meta:
         db_table = "pharmacy_addresses"
+
+    @override
+    def __repr__(self) -> str:
+        address_parts = [
+            self.region, self.city, self.street, self.apartment, self.postal_code
+        ]
+        repr = ", ".join(address_parts)
+        return repr
 
 
 class PharmacyWorkingSchedule(models.Model):

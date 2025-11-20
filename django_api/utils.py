@@ -97,22 +97,11 @@ class BaseOrderTest(BaseTestWithCreatedCustomer):
             "pharmacy": 1,
             "products": [1, 2, 3]
         }
-        self.fake = Faker("en_US")
-        self.pharmacy = self._create_pharmacy()
+        self.pharmacy_address = PharmacyAddressTestData().create_pharamacy_address()
+        LoggingConfig().logger.debug("%r", self.pharmacy_address)
 
     def _create_order(self) -> None:
         pass
-
-    def _create_pharmacy(self) -> None:
-        pharmacy_address = PharmacyAddress.objects.create(
-            region=self.fake.state()[:PharmacyAddress._meta.get_field("region").max_length],
-            city=self.fake.city()[:PharmacyAddress._meta.get_field("city").max_length],
-            street=self.fake.street_address()[:PharmacyAddress._meta.get_field("street").max_length],
-            apartment=self.fake.secondary_address()[:PharmacyAddress._meta.get_field("apartment").max_length],
-            postal_code=self.fake.postcode()[:PharmacyAddress._meta.get_field("postal_code").max_length]
-        )
-        LoggingConfig().logger.debug("%r", pharmacy_address)
-        return pharmacy_address
 
     def _cretat_products(self) -> None:
         pass
@@ -157,8 +146,44 @@ class CustomerTestData:
 
 
 class PharmacyTestData:
+    pass
+
+
+class PharmacyAddressTestData:
     def __init__(self, locale_code: str = "en_US") -> None:
         self.faker = Faker(locale_code)
+        self.model = PharmacyAddress
 
-    def generate_pharamacy_address(self) -> Pharmacy:
-        pass
+    def create_pharamacy_address(self) -> PharmacyAddress:
+        pharmacy_address_data = self.generate_pharmacy_address_data()
+        pharmacy_address = self.model.objects.create(**pharmacy_address_data)
+        return pharmacy_address
+
+    def generate_pharmacy_address_data(self) -> dict[str, str]:
+        pharmacy_address_data = self._generate_raw_pharmacy_address_data()
+        pharmacy_address_data = self._truncate_field_data(pharmacy_address_data)
+        return pharmacy_address_data
+
+    def _generate_raw_pharmacy_address_data(self) -> dict[str, str]:
+        pharmacy_address_data = {
+            "region": self.faker.state(),
+            "city": self.faker.city(),
+            "street": self.faker.street_address(),
+            "apartment": self.faker.secondary_address(),
+            "postal_code": self.faker.postcode()
+        }
+        return pharmacy_address_data
+
+    def _truncate_field_data(
+            self, pharmacy_address_data: dict[str, str]
+    ) -> dict[str, str]:
+        truncated_pharmacy_address_data = {
+            key: value[:self._get_field_max_length(key)]
+            for key, value
+            in pharmacy_address_data.items()
+        }
+        return truncated_pharmacy_address_data
+
+    def _get_field_max_length(self, field_name: str) -> int:
+        field_max_length = self.model._meta.get_field(field_name).max_length
+        return field_max_length
