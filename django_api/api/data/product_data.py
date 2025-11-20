@@ -1,9 +1,9 @@
 from django.db import models
 
-from api.data.base_data import FieldDefault, ModelAbstract
+from api.data.base_data import FieldDefault
 
 
-class ProductAbstract(ModelAbstract):
+class ProductAbstract(models.Model):
     title = models.CharField(max_length=FieldDefault.title_lenght)
 
     class Meta:

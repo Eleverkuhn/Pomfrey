@@ -1,6 +1,3 @@
-from django.db import models
-
-
 class FieldDefault:
     nanoid_size: int = 10
     phone_lenght: int = 10
@@ -11,10 +8,3 @@ class FieldDefault:
     street_length: int = 30
     apartment_length: int = 15
     postal_code_length: int = 8
-
-
-class ModelAbstract(models.Model):
-    id = models.IntegerField(primary_key=True)
-
-    class Meta:
-        abstract = True

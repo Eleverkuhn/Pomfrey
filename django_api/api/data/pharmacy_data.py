@@ -1,9 +1,9 @@
 from django.db import models
 
-from api.data.base_data import FieldDefault, ModelAbstract
+from api.data.base_data import FieldDefault
 
 
-class PharmacyAddress(ModelAbstract):
+class PharmacyAddress(models.Model):
     region = models.CharField(max_length=FieldDefault.geo_title_length)
     city = models.CharField(max_length=FieldDefault.geo_title_length)
     street = models.CharField(max_length=FieldDefault.street_length)
@@ -14,7 +14,7 @@ class PharmacyAddress(ModelAbstract):
         db_table = "pharmacy_addresses"
 
 
-class PharmacyWorkingSchedule(ModelAbstract):
+class PharmacyWorkingSchedule(models.Model):
     start_time = models.TimeField()
     end_time = models.TimeField()
 
@@ -22,7 +22,7 @@ class PharmacyWorkingSchedule(ModelAbstract):
         db_table = "pharmacy_working_schedules"
 
 
-class Pharmacy(ModelAbstract):
+class Pharmacy(models.Model):
     address = models.ForeignKey(PharmacyAddress, on_delete=models.CASCADE)
     schedule = models.ForeignKey(
         PharmacyWorkingSchedule, on_delete=models.CASCADE
