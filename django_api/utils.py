@@ -97,13 +97,11 @@ class BaseOrderTest(BaseTestWithCreatedCustomer):
     def setUp(self) -> None:
         super().setUp()
         self.pharmacy = PharmacyTestData().create_pharmacy()
-        # self.products = ProductTestData().create_multiple_products()
         self.order_data = {
             "customer": self.customer.id,
             "pharmacy": self.pharmacy.id,
             "products": ProductTestData().product_ids
         }
-
 
 
 class CustomerTestData:
