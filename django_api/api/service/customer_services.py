@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate
 from knox.models import AuthToken
 
-from logger.setup import LoggingConfig
+from logger.setup import RegistryLogging, LoginLogging
 from api.web.serializers.customer_serializers import (
     RegistrySerializer, CustomerSerializer, LoginSeralizer
 )
@@ -15,12 +15,7 @@ class RegistryService(BaseService):
     def exec(self) -> None:
         validated_data = self.validate()
         CustomerSerializer().create(validated_data)
-        self._log_created_user(validated_data.get("email"))
-
-    def _log_created_user(self, email: str) -> None:
-        LoggingConfig().logger.info(
-            f"User {email} has been successfully created"
-        )
+        RegistryLogging(validated_data["email"]).create_log()
 
 
 class LoginService(BaseService):
@@ -28,6 +23,7 @@ class LoginService(BaseService):
 
     def exec(self) -> dict:
         response_data = self._construct_response_data()
+        LoginLogging(response_data["email"]).create_log()
         return response_data
 
     def _construct_response_data(self) -> dict:

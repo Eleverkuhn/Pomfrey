@@ -1,4 +1,4 @@
-from logger.setup import LoggingConfig
+from logger.setup import OrderLogging
 from api.web.serializers.order_serializers import (
     OrderSerializerInput, OrderSerializerOutput
 )
@@ -10,7 +10,6 @@ class OrderService(BaseService):
     serializer_class = OrderSerializerInput
 
     def exec(self) -> dict:
-        LoggingConfig().logger.debug(f"Order service: {self.request_data}")
         validated_data = self.validate()
         order = self._create_order(validated_data)
         response_content = self._construct_response_content(order)
@@ -21,6 +20,7 @@ class OrderService(BaseService):
         order = Order(**order_data)
         order.save()
         order.products.set(products)
+        OrderLogging(order.id, order.products.all()).create_log()
         return order
 
     def _construct_response_content(self, order: Order) -> dict:
