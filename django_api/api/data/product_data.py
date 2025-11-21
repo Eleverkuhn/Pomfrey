@@ -1,3 +1,5 @@
+from typing import override
+
 from django.db import models
 
 from api.data.base_data import FieldDefault
@@ -33,6 +35,11 @@ class Product(ProductAbstract):
 
     type = models.ForeignKey(ProductType, on_delete=models.CASCADE)
     categories = models.ManyToManyField(ProductCategory)
+
+    @override
+    def __repr__(self) -> str:
+        repr = f"{self.id} {self.title}"
+        return repr
 
     class Meeta:
         db_table = "products"
