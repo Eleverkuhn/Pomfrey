@@ -18,7 +18,7 @@ class ProductCategory(ProductAbstract):
 
 
 class ProductType(ProductAbstract):
-    pass
+    categories = models.ManyToManyField(ProductCategory)
 
     class Meta:
         db_table = "product_types"
@@ -29,7 +29,7 @@ class Product(ProductAbstract):
         max_digits=FieldDefault.decimal_digits,
         decimal_places=FieldDefault.decimal_places
     )
-    amount = models.IntegerField()
+    stock = models.IntegerField()
 
     type = models.ForeignKey(ProductType, on_delete=models.CASCADE)
     categories = models.ManyToManyField(ProductCategory)
