@@ -34,7 +34,7 @@ class PharmacyWorkingSchedule(models.Model):
 
 class Pharmacy(models.Model):
     address = models.ForeignKey(PharmacyAddress, on_delete=models.CASCADE)
-    schedule = models.ForeignKey(
+    working_schedule = models.ForeignKey(
         PharmacyWorkingSchedule, on_delete=models.CASCADE
     )
 
