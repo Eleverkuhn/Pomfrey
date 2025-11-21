@@ -8,21 +8,21 @@ from knox.auth import TokenAuthentication
 from api.service.customer_services import RegistryService, LoginService
 
 
-class Registry(APIView):
+class RegistryView(APIView):
     def post(self, request: Request) -> Response:
         service = RegistryService(request.data)
         service.exec()
         return Response(status=status.HTTP_201_CREATED)
 
 
-class Login(APIView):
+class LoginView(APIView):
     def post(self, request: Request) -> Response:
         service = LoginService(request.data)
         response_data = service.exec()
         return Response(response_data, status=status.HTTP_200_OK)
 
 
-class CustomerPage(APIView):
+class CustomerPageView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 

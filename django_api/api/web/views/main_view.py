@@ -3,6 +3,6 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 
-class Main(APIView):
+class MainView(APIView):
     def get(self, request: Request, format=None) -> Response:
         return Response(status=200)

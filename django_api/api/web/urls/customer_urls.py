@@ -1,7 +1,7 @@
 from django.urls import path
 
-from api.web.views.customer_views import CustomerPage
+from api.web.views.customer_views import CustomerPageView
 
 urlpatterns = [
-    path("", CustomerPage.as_view(), name="my"),
+    path("", CustomerPageView.as_view(), name="my"),
 ]
