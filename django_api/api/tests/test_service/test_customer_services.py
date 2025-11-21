@@ -28,7 +28,7 @@ class TestRegistryService(BaseTestService, BaseRegistryTest):
         LoggingConfig().get_logger().debug(validated_data)
 
     def test_validation_fails_for_non_unique_email(self) -> None:
-        self._create_customer()
+        self.customer_test_data.create_customer(self.data)
         with self.assertRaises(ValidationError) as cm:
             self.service.validate()
         self.assertTrue(cm.exception.get_full_details().get("email"))
