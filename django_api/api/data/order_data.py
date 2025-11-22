@@ -40,7 +40,7 @@ class Delivery(models.Model):
         RECEIVED = "Received"
 
     type = models.CharField(choices=Type)
-    status = models.CharField(choices=Status)
+    status = models.CharField(choices=Status, default=Status.PROCESSING)
 
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
 
