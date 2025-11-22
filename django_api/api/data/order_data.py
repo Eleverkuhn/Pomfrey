@@ -42,7 +42,9 @@ class Delivery(models.Model):
     type = models.CharField(choices=Type)
     status = models.CharField(choices=Status, default=Status.PROCESSING)
 
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    order = models.OneToOneField(
+        Order, on_delete=models.CASCADE, related_name="delivery"
+    )
 
     @override
     def __repr__(self) -> str:
@@ -61,7 +63,7 @@ class Payment(models.Model):
     type = models.CharField(choices=Type)
     is_paid = models.BooleanField(default=False)
 
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    order = models.OneToOneField(Order, on_delete=models.CASCADE)
 
     @override
     def __repr__(self) -> str:
