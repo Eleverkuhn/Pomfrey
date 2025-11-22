@@ -16,4 +16,6 @@ dependencies = [
   "django-rest-knox==5.0.2",
   "httpie==3.2.4",
   "Faker==38.2.0",
+  "django-phonenumber-field==8.3.0",
+  "phonenumbers==9.0.19",
 ]
