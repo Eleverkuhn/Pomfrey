@@ -15,11 +15,15 @@ from rest_framework import status
 from rest_framework.response import Response
 from knox.models import AuthToken
 
-from logger.setup import LoggingConfig
 from api.service.base_services import BaseService
 from api.data.customer_data import Customer
 from api.data.pharmacy_data import (
-    PharmacyAddress, PharmacyWorkingSchedule, Pharmacy
+    PharmacyAddress,
+    PharmacyWorkingSchedule,
+    Pharmacy,
+    PharmacyRepository,
+    PharmacyRelationRepository,
+    PharmacyWorkingScheduleRepository
 )
 from api.data.product_data import ProductCategory, ProductType, Product
 from api.data.order_data import Delivery, Payment
@@ -145,37 +149,44 @@ class CustomerTestData:
         return customer
 
 
-class PharmacyTestData:
+class LocaleTestData:
+    """
+    Test data for a specific location
+    """
+    def __init__(self, locale: str = "en_US", **kwargs) -> None:
+        super().__init__(**kwargs)
+        self.faker = Faker(locale)
+
+
+class PharmacyTestData(LocaleTestData):
+    @override
     def __init__(self) -> None:
-        self.address_test_data = PharmacyAddressTestData()
-        self.working_schedule_test_data = PharmacyWorkingScheduleTestData()
+        super().__init__()
+        self.adress_test_data = PharmacyAddressTestData()
+        self.schedule_test_data = PharmacyWorkingScheduleTestData()
+
+    @property
+    def pharmacy_repository(self) -> PharmacyRepository:
+        pharmacy_repository = PharmacyRepository(self.generate_model_data())
+        return pharmacy_repository
 
     def create_pharmacy(self) -> Pharmacy:
-        address, working_schedule = self.create_related_table_entries()
-        pharmacy = Pharmacy.objects.create(
-            address=address, working_schedule=working_schedule
-        )
+        pharmacy = self.pharmacy_repository.create()
         return pharmacy
 
-    def create_related_table_entries(
-            self
-    ) -> tuple[PharmacyAddress, PharmacyWorkingSchedule]:
-        address = self.address_test_data.create_pharamacy_address()
-        schedule = self.working_schedule_test_data.create_pharmacy_working_schedule()
-        return (address, schedule)
+    def generate_model_data(self) -> dict:
+        model_data = {
+            "pharmacy": {"phone": self.faker.phone_number()},
+            "address": self.adress_test_data.generate_model_data(),
+            "schedule": self.schedule_test_data.generate_model_data()
+        }
+        return model_data
 
 
-class PharmacyAddressTestData:
-    def __init__(self, locale_code: str = "en_US") -> None:
-        self.faker = Faker(locale_code)
-        self.model = PharmacyAddress
+class PharmacyAddressTestData(LocaleTestData):
+    model = PharmacyAddress
 
-    def create_pharamacy_address(self) -> PharmacyAddress:
-        pharmacy_address_data = self.generate_pharmacy_address_data()
-        pharmacy_address = self.model.objects.create(**pharmacy_address_data)
-        return pharmacy_address
-
-    def generate_pharmacy_address_data(self) -> dict[str, str]:
+    def generate_model_data(self) -> dict[str, str]:
         pharmacy_address_data = self._generate_raw_pharmacy_address_data()
         pharmacy_address_data = self._truncate_field_data(pharmacy_address_data)
         return pharmacy_address_data
@@ -206,16 +217,15 @@ class PharmacyAddressTestData:
 
 
 class PharmacyWorkingScheduleTestData:
-    def __init__(self, start_hour: int = 8, end_hour: int = 20) -> None:
-        self.start_hour = start_hour
-        self.end_hour = end_hour
+    START_HOUR = 8
+    END_HOUR = 20
 
-    def create_pharmacy_working_schedule(self) -> PharmacyWorkingSchedule:
-        pharmacy_working_schedule = PharmacyWorkingSchedule.objects.create(
-            start_time=time(hour=self.start_hour),
-            end_time=time(hour=self.end_hour)
-        )
-        return pharmacy_working_schedule
+    def generate_model_data(self) -> dict:
+        test_data = {
+            "start_time": time(hour=self.START_HOUR),
+            "end_time": time(hour=self.END_HOUR)
+        }
+        return test_data
 
 
 class ProductTestData:
