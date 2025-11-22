@@ -2,7 +2,9 @@ from typing import override
 
 from django.db import models
 
-from api.data.base_data import BaseRepository
+from api.data.base_data import (
+    BaseRepository, BaseRelationRepository, ModelType
+)
 from api.data.customer_data import Customer
 from api.data.product_data import Product
 from api.data.pharmacy_data import Pharmacy
@@ -72,19 +74,16 @@ class Payment(models.Model):
         return repr
 
 
-class BaseOrderRelationRepository(BaseRepository):
+class BaseOrderRelationRepository(BaseRelationRepository[Order]):
     @override
     def __init__(
-            self, model: type[models.Model], model_data: dict, order: Order
+            self,
+            model: type[ModelType],
+            model_data: dict,
+            related_model: models.Model,
+            related_field_name: str = "order"
     ) -> None:
-        super().__init__(model, model_data)
-        self.order = order
-
-    @override
-    def create(self) -> models.Model:
-        model = self.model(**self.model_data, order=self.order)
-        model.save()
-        return model
+        super().__init__(model, model_data, related_model, related_field_name)
 
 
 class OrderRepository(BaseRepository[Order]):
@@ -128,7 +127,7 @@ class OrderRepository(BaseRepository[Order]):
         delivery_repository = BaseOrderRelationRepository(
             self.related_models[0],
             self.relations_data["delivery_data"],
-            order
+            order,
         )
         return delivery_repository
 
@@ -142,6 +141,6 @@ class OrderRepository(BaseRepository[Order]):
         payment_repository = BaseOrderRelationRepository(
             self.related_models[1],
             self.relations_data["payment_data"],
-            order
+            order,
         )
         return payment_repository
