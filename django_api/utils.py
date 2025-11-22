@@ -22,6 +22,7 @@ from api.data.pharmacy_data import (
     PharmacyAddress, PharmacyWorkingSchedule, Pharmacy
 )
 from api.data.product_data import ProductCategory, ProductType, Product
+from api.data.order_data import Delivery, Payment
 
 
 class BaseDatabaseTest:
@@ -100,7 +101,9 @@ class BaseOrderTest(BaseTestWithCreatedCustomer):
         self.order_data = {
             "customer": self.customer.id,
             "pharmacy": self.pharmacy.id,
-            "products": ProductTestData().product_ids
+            "products": ProductTestData().product_ids,
+            "delivery": {"type": Delivery.Type.DELIVERY},
+            "payment": {"type": Payment.Type.CARD, "is_paid": True}
         }
 
 
