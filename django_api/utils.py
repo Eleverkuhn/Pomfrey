@@ -15,18 +15,20 @@ from rest_framework import status
 from rest_framework.response import Response
 from knox.models import AuthToken
 
+from logger.setup import LoggingConfig
 from api.service.base_services import BaseService
+from api.data.base_data import BaseRepository
 from api.data.customer_data import Customer
 from api.data.pharmacy_data import (
-    PharmacyAddress,
-    PharmacyWorkingSchedule,
+    # PharmacyWorkingSchedule,
     Pharmacy,
     PharmacyRepository,
-    PharmacyRelationRepository,
-    PharmacyWorkingScheduleRepository
+    # PharmacyRelationRepository,
+    # PharmacyWorkingScheduleRepository
 )
 from api.data.product_data import ProductCategory, ProductType, Product
 from api.data.order_data import Delivery, Payment
+from api.data.geo_data import Address
 
 
 class BaseDatabaseTest:
@@ -158,33 +160,19 @@ class LocaleTestData:
         self.faker = Faker(locale)
 
 
-class PharmacyTestData(LocaleTestData):
-    @override
-    def __init__(self) -> None:
-        super().__init__()
-        self.adress_test_data = PharmacyAddressTestData()
-        self.schedule_test_data = PharmacyWorkingScheduleTestData()
+class AddressTestData(LocaleTestData):
+    model = Address
 
     @property
-    def pharmacy_repository(self) -> PharmacyRepository:
-        pharmacy_repository = PharmacyRepository(self.generate_model_data())
-        return pharmacy_repository
+    def address_repository(self) -> BaseRepository:
+        address_repository = BaseRepository(
+            self.model, self.generate_model_data()
+        )
+        return address_repository
 
-    def create_pharmacy(self) -> Pharmacy:
-        pharmacy = self.pharmacy_repository.create()
-        return pharmacy
-
-    def generate_model_data(self) -> dict:
-        model_data = {
-            "pharmacy": {"phone": self.faker.phone_number()},
-            "address": self.adress_test_data.generate_model_data(),
-            "schedule": self.schedule_test_data.generate_model_data()
-        }
-        return model_data
-
-
-class PharmacyAddressTestData(LocaleTestData):
-    model = PharmacyAddress
+    def create_address(self) -> Address:
+        address = self.address_repository.create()
+        return address
 
     def generate_model_data(self) -> dict[str, str]:
         pharmacy_address_data = self._generate_raw_pharmacy_address_data()
@@ -214,6 +202,33 @@ class PharmacyAddressTestData(LocaleTestData):
     def _get_field_max_length(self, field_name: str) -> int:
         field_max_length = self.model._meta.get_field(field_name).max_length
         return field_max_length
+
+
+class PharmacyTestData(LocaleTestData):
+    @override
+    def __init__(self) -> None:
+        super().__init__()
+        self.address = AddressTestData().create_address()
+        self.schedule_test_data = PharmacyWorkingScheduleTestData()
+
+    @property
+    def pharmacy_repository(self) -> PharmacyRepository:
+        pharmacy_repository = PharmacyRepository(self.generate_model_data())
+        return pharmacy_repository
+
+    def create_pharmacy(self) -> Pharmacy:
+        pharmacy = self.pharmacy_repository.create()
+        return pharmacy
+
+    def generate_model_data(self) -> dict:
+        model_data = {
+            "pharmacy": {
+                "phone": self.faker.phone_number(),
+                "address": self.address
+            },
+            "schedule": self.schedule_test_data.generate_model_data()
+        }
+        return model_data
 
 
 class PharmacyWorkingScheduleTestData:
