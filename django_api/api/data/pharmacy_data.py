@@ -4,46 +4,20 @@ from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
 
 from api.data.base_data import (
-    FieldDefault, BaseRepository, BaseRelationRepository, ModelType
+    BaseRepository, BaseRelationRepository, ModelType
 )
+from api.data.geo_data import Address
 
 
 class Pharmacy(models.Model):
     phone = PhoneNumberField(region="US", null=True)
 
-    class Meta:
-        db_table = "pharmacies"
-
-
-class PharmacyAddress(models.Model):
-    region = models.CharField(max_length=FieldDefault.geo_title_length)
-    city = models.CharField(max_length=FieldDefault.geo_title_length)
-    street = models.CharField(max_length=FieldDefault.street_length)
-    apartment = models.CharField(max_length=FieldDefault.apartment_length)
-    postal_code = models.CharField(max_length=FieldDefault.postal_code_length)
-
-    pharmacy = models.OneToOneField(
-        Pharmacy,
-        on_delete=models.CASCADE,
-        related_name="pharmacy",
-        null=True
+    address = models.OneToOneField(
+        Address, on_delete=models.CASCADE, related_name="address", null=True
     )
 
     class Meta:
-        db_table = "pharmacy_addresses"
-
-    @override
-    def __repr__(self) -> str:
-        address_parts = [
-            str(self.pharmacy.id),
-            self.region,
-            self.city,
-            self.street,
-            self.apartment,
-            self.postal_code
-        ]
-        repr = ", ".join(address_parts)
-        return repr
+        db_table = "pharmacies"
 
 
 class PharmacyWorkingSchedule(models.Model):
@@ -64,13 +38,6 @@ class PharmacyRepository(BaseRepository):
         super().__init__(model, model_data)
 
     @property
-    def address_repository(self) -> "PharmacyRelationRepository":
-        address_repository = PharmacyRelationRepository(
-            PharmacyAddress, self.model_data["address"], self.pharmacy
-        )
-        return address_repository
-
-    @property
     def schedule_repository(self) -> "PharmacyWorkingScheduleRepository":
         schedule_repository = PharmacyWorkingScheduleRepository(
             self.model_data["schedule"], self.pharmacy
@@ -81,12 +48,8 @@ class PharmacyRepository(BaseRepository):
     def create(self) -> Pharmacy:
         self.pharmacy = self.model(**self.model_data["pharmacy"])
         self.pharmacy.save()
-        self._create_relations()
-        return self.pharmacy
-
-    def _create_relations(self) -> None:
-        self.address_repository.create()
         self.schedule_repository.create()
+        return self.pharmacy
 
 
 class PharmacyRelationRepository(
