@@ -1,6 +1,7 @@
+from abc import ABC, abstractmethod
 from typing import Generic, TypeVar, override
 
-from django.db import models
+from django.db import models, transaction
 
 ModelType = TypeVar("ModelType", bound=models.Model)
 
@@ -22,9 +23,16 @@ class BaseRepository(Generic[ModelType]):
         self.model: type[ModelType] = model
         self.model_data = model_data
 
-    def create(self) -> ModelType:
-        model = self.model(**self.model_data)
+    def create(self, model_data: dict | None = None) -> ModelType:
+        model = self._construct_model_instance(model_data)
         model.save()
+        return model
+
+    def _construct_model_instance(self, model_data: dict | None) -> ModelType:
+        if model_data:
+            model = self.model(**model_data)
+        else:
+            model = self.model(**self.model_data)
         return model
 
 
@@ -51,3 +59,16 @@ class BaseRelationRepository(BaseRepository, Generic[ModelType]):
         model = self.model(**self.model_data, **self.related_field_data)
         model.save()
         return model
+
+
+class BaseMainRepository(ABC, BaseRepository, Generic[ModelType]):
+    @override
+    @transaction.atomic
+    def create(self, model_data: dict | None = None) -> ModelType:
+        self.model_instance = super().create(model_data)
+        self._create_relations()
+        return self.model_instance
+
+    @abstractmethod
+    def _create_relations(self) -> None:
+        pass
