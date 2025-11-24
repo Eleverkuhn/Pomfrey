@@ -1,9 +1,10 @@
+from datetime import datetime
 from typing import override
 
 from django.db import models, transaction
 
 from api.data.base_data import (
-    BaseRepository, BaseRelationRepository, BaseMainRepository, ModelType
+    BaseRelationRepository, BaseMainRepository, ModelType
 )
 from api.data.customer_data import Customer
 from api.data.product_data import Product
@@ -20,6 +21,12 @@ class Order(models.Model):
     products = models.ManyToManyField(Product)
     pharmacy = models.ForeignKey(Pharmacy, on_delete=models.CASCADE)
     status = models.CharField(choices=Status, default=Status.PENDING)
+    date = models.DateField(auto_now=True)
+    time = models.TimeField(auto_now=True)
+
+    @property
+    def date_and_time(self) -> datetime:
+        return datetime.combine(self.date, self.time)
 
     @override
     def __repr__(self) -> str:
