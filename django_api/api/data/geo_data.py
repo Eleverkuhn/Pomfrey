@@ -12,11 +12,8 @@ class Address(models.Model):
     apartment = models.CharField(max_length=FieldDefault.apartment_length)
     postal_code = models.CharField(max_length=FieldDefault.postal_code_length)
 
-    class Meeta:
-        db_table = "addresses"
-
-    @override
-    def __repr__(self) -> str:
+    @property
+    def full_address(self) -> str:
         address_parts = [
             self.region,
             self.city,
@@ -24,5 +21,12 @@ class Address(models.Model):
             self.apartment,
             self.postal_code
         ]
-        repr = ", ".join(address_parts)
-        return repr
+        full_address = ", ".join(address_parts)
+        return full_address
+
+    class Meeta:
+        db_table = "addresses"
+
+    @override
+    def __repr__(self) -> str:
+        return self.full_address

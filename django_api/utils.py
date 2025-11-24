@@ -100,12 +100,14 @@ class BaseOrderTest(BaseTestWithCreatedCustomer):
     @override
     def setUp(self) -> None:
         super().setUp()
+        self.pharmacy = PharmacyTestData().create_pharmacy()
+        self.product_ids = ProductTestData().product_ids
         self.order_data = self.generate_model_data()
 
     def generate_model_data(self) -> dict:
         model_data = {
             "order": self._generate_order_data(),
-            "products": self._get_product_ids(),
+            "products": self.product_ids,
             "delivery": self._generate_delivery_data(),
             "payment": self._generate_payment_data()
         }
@@ -114,17 +116,9 @@ class BaseOrderTest(BaseTestWithCreatedCustomer):
     def _generate_order_data(self) -> dict:
         order = {
             "customer": self.customer.id,
-            "pharmacy": self._get_pharmacy_id()
+            "pharmacy": self.pharmacy.id
         }
         return order
-
-    def _get_pharmacy_id(self) -> int:
-        pharmacy = PharmacyTestData().create_pharmacy()
-        return pharmacy.id
-
-    def _get_product_ids(self) -> list[int]:
-        product_ids = ProductTestData().product_ids
-        return product_ids
 
     def _generate_delivery_data(self) -> dict:
         delivery_data = {"type": Delivery.Type.DELIVERY}

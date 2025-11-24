@@ -1,30 +1,29 @@
 from rest_framework import serializers
 
+from api.web.serializers.customer_serializers import CustomerOutputSerializer
+from api.web.serializers.pharmacy_serializers import PharmacySerializerOutput
 from api.data.order_data import Order, Delivery, Payment
 
 
 class DeliverySeriazlierInput(serializers.ModelSerializer):
     class Meta:
         model = Delivery
-        fields = ["type", "status"]
+        fields = ["type"]
 
 
 class DeliverySeriazlierOutput(serializers.ModelSerializer):
     class Meta:
         model = Delivery
-        fields = "__all__"
+        fields = ["type", "status"]
 
 
-class PaymentSerializerInput(serializers.ModelSerializer):
+class PaymentSerializer(serializers.ModelSerializer):
+    """
+    This serializer is applied both for input and output validation
+    """
     class Meta:
         model = Payment
         fields = ["type", "is_paid"]
-
-
-class PamentSeriazlierOutput(serializers.ModelSerializer):
-    class Meta:
-        model = Payment
-        fields = "__all__"
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -35,7 +34,7 @@ class OrderSerializer(serializers.ModelSerializer):
 
 class OrderSerializerInput(serializers.ModelSerializer):
     delivery = DeliverySeriazlierInput()
-    payment = PaymentSerializerInput()
+    payment = PaymentSerializer()
     order = OrderSerializer()
 
     class Meta:
@@ -44,7 +43,10 @@ class OrderSerializerInput(serializers.ModelSerializer):
 
 
 class OrderSerializerOutput(serializers.ModelSerializer):
+    customer = CustomerOutputSerializer()
+    pharmacy = PharmacySerializerOutput()
     delivery = DeliverySeriazlierOutput()
+    payment = PaymentSerializer()
 
     class Meta:
         model = Order

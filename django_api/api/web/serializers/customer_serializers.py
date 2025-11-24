@@ -54,6 +54,12 @@ class CustomerSerializer(serializers.ModelSerializer):
         return customer
 
 
+class CustomerOutputSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Customer
+        fields = ["id", "email"]
+
+
 class LoginSeralizer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)

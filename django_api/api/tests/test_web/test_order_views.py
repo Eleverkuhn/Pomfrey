@@ -7,6 +7,7 @@ from rest_framework.response import Response
 
 from logger.setup import LoggingConfig
 from utils import BaseOrderTest, BaseViewTest
+from api.data.order_data import Order, Delivery
 
 
 class TestOrderView(BaseOrderTest, BaseViewTest):
@@ -24,19 +25,48 @@ class TestOrderView(BaseOrderTest, BaseViewTest):
         response = self._send_post_request()
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-    def test_returns_order_info(self) -> None:
+    def test_order_id_in_response(self) -> None:
+        content = self._get_response_content()
+        LoggingConfig().logger.debug(f"Response Content: {content}")
+        self.assertTrue(content.get("id"))
+
+    def test_customer_in_response(self) -> None:
+        content = self._get_response_content()
+        customer = content["customer"]
+
+        self.assertEqual(customer["id"], self.order_data["order"]["customer"])
+        self.assertEqual(customer["email"], self.data["email"])
+
+    def test_status_in_response(self) -> None:
+        content = self._get_response_content()
+        self.assertEqual(content["status"], Order.Status.PENDING)
+
+    def test_pharmacy_in_response(self) -> None:
+        content = self._get_response_content()
+        pharmacy = content["pharmacy"]
+        address = ", ".join(pharmacy["address"].values())
+
+        self.assertEqual(pharmacy["phone"], self.pharmacy.phone)
+        self.assertEqual(address, self.pharmacy.address.full_address)
+
+    def test_delivery_in_response(self) -> None:
+        content = self._get_response_content()
+        delivery = content["delivery"]
+
+        self.assertEqual(delivery["type"], self.order_data["delivery"]["type"])
+        self.assertEqual(delivery["status"], Delivery.Status.PROCESSING)
+
+    def test_payment_in_response(self) -> None:
+        content = self._get_response_content()
+        payment = content["payment"]
+
+        self.assertEqual(payment["type"], self.order_data["payment"]["type"])
+        self.assertEqual(payment["is_paid"], True)
+
+    def _get_response_content(self) -> dict:
         response = self._send_post_request()
         response_content = self._convert_response_to_json(response)
-        LoggingConfig().logger.debug(f"Response: {response_content}")
-        self.assertEqual(
-            self.order_data["order"]["customer"], response_content["customer"]
-        )
-        self.assertEqual(
-            self.order_data["order"]["pharmacy"], response_content["pharmacy"]
-        )
-        self.assertEqual(
-            self.order_data["products"], response_content["products"]
-        )
+        return response_content
 
     def _send_post_request(self) -> Response:
         response = self.client.post(

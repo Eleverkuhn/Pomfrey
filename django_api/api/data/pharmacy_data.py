@@ -4,7 +4,7 @@ from django.db import models, transaction
 from phonenumber_field.modelfields import PhoneNumberField
 
 from api.data.base_data import (
-    BaseRepository, BaseRelationRepository, BaseMainRepository, ModelType
+    BaseRelationRepository, BaseMainRepository, ModelType
 )
 from api.data.geo_data import Address
 
