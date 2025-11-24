@@ -1,10 +1,10 @@
 from typing import override, Generic
 
-from django.db import models
+from django.db import models, transaction
 from phonenumber_field.modelfields import PhoneNumberField
 
 from api.data.base_data import (
-    BaseRepository, BaseRelationRepository, ModelType
+    BaseRepository, BaseRelationRepository, BaseMainRepository, ModelType
 )
 from api.data.geo_data import Address
 
@@ -30,7 +30,7 @@ class PharmacyWorkingSchedule(models.Model):
         db_table = "pharmacy_working_schedules"
 
 
-class PharmacyRepository(BaseRepository):
+class PharmacyRepository(BaseMainRepository[Pharmacy]):
     @override
     def __init__(
             self, model_data: dict, model: type[Pharmacy] = Pharmacy
@@ -40,16 +40,19 @@ class PharmacyRepository(BaseRepository):
     @property
     def schedule_repository(self) -> "PharmacyWorkingScheduleRepository":
         schedule_repository = PharmacyWorkingScheduleRepository(
-            self.model_data["schedule"], self.pharmacy
+            self.model_data["schedule"], self.model_instance
         )
         return schedule_repository
 
     @override
+    @transaction.atomic
     def create(self) -> Pharmacy:
-        self.pharmacy = self.model(**self.model_data["pharmacy"])
-        self.pharmacy.save()
+        super().create(self.model_data["pharmacy"])
+        return self.model_instance
+
+    @override
+    def _create_relations(self) -> None:
         self.schedule_repository.create()
-        return self.pharmacy
 
 
 class PharmacyRelationRepository(
