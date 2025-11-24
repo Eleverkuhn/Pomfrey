@@ -20,11 +20,8 @@ from api.service.base_services import BaseService
 from api.data.base_data import BaseRepository
 from api.data.customer_data import Customer
 from api.data.pharmacy_data import (
-    # PharmacyWorkingSchedule,
     Pharmacy,
     PharmacyRepository,
-    # PharmacyRelationRepository,
-    # PharmacyWorkingScheduleRepository
 )
 from api.data.product_data import ProductCategory, ProductType, Product
 from api.data.order_data import Delivery, Payment
@@ -103,14 +100,39 @@ class BaseOrderTest(BaseTestWithCreatedCustomer):
     @override
     def setUp(self) -> None:
         super().setUp()
-        self.pharmacy = PharmacyTestData().create_pharmacy()
-        self.order_data = {
-            "customer": self.customer.id,
-            "pharmacy": self.pharmacy.id,
-            "products": ProductTestData().product_ids,
-            "delivery": {"type": Delivery.Type.DELIVERY},
-            "payment": {"type": Payment.Type.CARD, "is_paid": True}
+        self.order_data = self.generate_model_data()
+
+    def generate_model_data(self) -> dict:
+        model_data = {
+            "order": self._generate_order_data(),
+            "products": self._get_product_ids(),
+            "delivery": self._generate_delivery_data(),
+            "payment": self._generate_payment_data()
         }
+        return model_data
+
+    def _generate_order_data(self) -> dict:
+        order = {
+            "customer": self.customer.id,
+            "pharmacy": self._get_pharmacy_id()
+        }
+        return order
+
+    def _get_pharmacy_id(self) -> int:
+        pharmacy = PharmacyTestData().create_pharmacy()
+        return pharmacy.id
+
+    def _get_product_ids(self) -> list[int]:
+        product_ids = ProductTestData().product_ids
+        return product_ids
+
+    def _generate_delivery_data(self) -> dict:
+        delivery_data = {"type": Delivery.Type.DELIVERY}
+        return delivery_data
+
+    def _generate_payment_data(self) -> dict:
+        payment_data = {"type": Payment.Type.CARD, "is_paid": True}
+        return payment_data
 
 
 class CustomerTestData:

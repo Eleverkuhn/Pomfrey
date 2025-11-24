@@ -29,13 +29,13 @@ class TestOrderView(BaseOrderTest, BaseViewTest):
         response_content = self._convert_response_to_json(response)
         LoggingConfig().logger.debug(f"Response: {response_content}")
         self.assertEqual(
-            self.order_data.get("customer"), response_content.get("customer")
+            self.order_data["order"]["customer"], response_content["customer"]
         )
         self.assertEqual(
-            self.order_data.get("pharmacy"), response_content.get("pharmacy")
+            self.order_data["order"]["pharmacy"], response_content["pharmacy"]
         )
         self.assertEqual(
-            self.order_data.get("products"), response_content.get("products")
+            self.order_data["products"], response_content["products"]
         )
 
     def _send_post_request(self) -> Response:

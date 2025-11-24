@@ -27,13 +27,20 @@ class PamentSeriazlierOutput(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class OrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ["customer", "pharmacy"]
+
+
 class OrderSerializerInput(serializers.ModelSerializer):
     delivery = DeliverySeriazlierInput()
     payment = PaymentSerializerInput()
+    order = OrderSerializer()
 
     class Meta:
         model = Order
-        fields = ["customer", "products", "pharmacy", "delivery", "payment"]
+        fields = ["order", "products", "delivery", "payment"]
 
 
 class OrderSerializerOutput(serializers.ModelSerializer):
