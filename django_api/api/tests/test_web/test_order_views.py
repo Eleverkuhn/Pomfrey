@@ -25,9 +25,24 @@ class TestOrderView(BaseOrderTest, BaseViewTest):
         response = self._send_post_request()
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-    def test_order_id_in_response(self) -> None:
+    def test_check_response_content(self) -> None:
         content = self._get_response_content()
-        LoggingConfig().logger.debug(f"Response Content: {content}")
+
+    def _get_response_content(self) -> dict:
+        response = self._send_post_request()
+        response_content = self._convert_response_to_json(response)
+        return response_content
+
+    def _send_post_request(self) -> Response:
+        response = self.client.post(
+            self.url,
+            data=self.json_order_data,
+            content_type="application/json"
+        )
+        return response
+
+    def _check_order_id_in_response(self) -> None:
+        content = self._get_response_content()
         self.assertTrue(content.get("id"))
 
     def test_customer_in_response(self) -> None:
@@ -35,7 +50,7 @@ class TestOrderView(BaseOrderTest, BaseViewTest):
         customer = content["customer"]
 
         self.assertEqual(customer["id"], self.order_data["order"]["customer"])
-        self.assertEqual(customer["email"], self.data["email"])
+        self.assertEqual(customer["email"], self.customer_data["email"])
 
     def test_status_in_response(self) -> None:
         content = self._get_response_content()
@@ -62,16 +77,3 @@ class TestOrderView(BaseOrderTest, BaseViewTest):
 
         self.assertEqual(payment["type"], self.order_data["payment"]["type"])
         self.assertEqual(payment["is_paid"], True)
-
-    def _get_response_content(self) -> dict:
-        response = self._send_post_request()
-        response_content = self._convert_response_to_json(response)
-        return response_content
-
-    def _send_post_request(self) -> Response:
-        response = self.client.post(
-            self.url,
-            data=self.json_order_data,
-            content_type="application/json"
-        )
-        return response

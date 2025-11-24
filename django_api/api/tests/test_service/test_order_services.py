@@ -1,19 +1,18 @@
 from typing import override
 
-from utils import BaseTestService, BaseOrderTest
+from utils import BaseOrderTest
 from api.service.order_services import OrderService
 from api.data.order_data import Order, Delivery
 
 
-class TestOrderService(BaseTestService, BaseOrderTest):
-    service_class = OrderService
-
+class TestOrderService(BaseOrderTest):
     @override
-    def setUp(self) -> None:
-        super().setUp()
-        self.service = self.service_class(self.order_data)
-        self.expected_delivery_output = {
-            "type": self.order_data["delivery"]["type"],
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+        cls.service = OrderService(cls.order_data)
+        cls.expected_delivery_output = {
+            "type": cls.order_data["delivery"]["type"],
             "status": Delivery.Status.PROCESSING
         }
 
@@ -29,7 +28,7 @@ class TestOrderService(BaseTestService, BaseOrderTest):
 
     def test_created_order_contains_customer_relation(self) -> None:
         order_db = self._execute_service_and_get_order_from_db()
-        self.assertEqual(order_db.customer.email, self.data["email"])
+        self.assertEqual(order_db.customer.email, self.customer_data["email"])
 
     def test_created_order_contains_delivery_relation(self) -> None:
         order_db = self._execute_service_and_get_order_from_db()

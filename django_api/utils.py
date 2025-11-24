@@ -16,9 +16,9 @@ from rest_framework.response import Response
 from knox.models import AuthToken
 
 from logger.setup import LoggingConfig
-from api.service.base_services import BaseService
+from api.service.customer_services import RegistryService
 from api.data.base_data import BaseRepository
-from api.data.customer_data import Customer
+from api.data.customer_data import Customer, CustomerRepository
 from api.data.pharmacy_data import (
     Pharmacy,
     PharmacyRepository,
@@ -45,17 +45,31 @@ class UtilsTest:
         return auth_header
 
 
-class BaseAuthTest(TestCase):
-    def setUp(self) -> None:
-        self.customer_test_data = CustomerTestData()
-        self.data = self.customer_test_data.generate_login_data()
+class BaseTestWithCustomer:
+    @staticmethod
+    def generate_login_data() -> dict:
+        login_data = CustomerTestData().generate_login_data()
+        return login_data
+
+    @staticmethod
+    def create_customer(model_data: dict | None = None) -> Customer:
+        customer = CustomerTestData(model_data).create_customer()
+        return customer
+
+
+class BaseAuthTest(TestCase, BaseTestWithCustomer):
+    @override
+    @classmethod
+    def setUpTestData(cls) -> None:
+        cls.customer_data = cls.generate_login_data()
 
 
 class BaseTestWithCreatedCustomer(BaseAuthTest, UtilsTest):
     @override
-    def setUp(self) -> None:
-        super().setUp()
-        self.customer = self.customer_test_data.create_customer(self.data)
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+        cls.customer = cls.create_customer(cls.customer_data)
 
 
 class BaseTestWithAuthenticationHeader(BaseTestWithCreatedCustomer):
@@ -65,18 +79,18 @@ class BaseTestWithAuthenticationHeader(BaseTestWithCreatedCustomer):
         self.auth_header = self._create_auth_header()
 
 
-class BaseTestService(UtilsTest):
-    service_class: type[BaseService]
-
-    def setUp(self) -> None:
-        super().setUp()
-        self.service = self.service_class(self.data)
-
-
 class BaseRegistryTest(BaseAuthTest):
-    def setUp(self) -> None:
-        super().setUp()
-        self.data.update({"confirm_password": self.data.get("password")})
+    @override
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+        cls._add_confirm_password_field()
+        cls.service = RegistryService(cls.customer_data)
+
+    @classmethod
+    def _add_confirm_password_field(cls) -> None:
+        update_data = {"confirm_password": cls.customer_data["password"]}
+        cls.customer_data.update(update_data)
 
 
 class BaseLogoutTest(UtilsTest):
@@ -98,54 +112,55 @@ class BaseViewTest:
 
 class BaseOrderTest(BaseTestWithCreatedCustomer):
     @override
-    def setUp(self) -> None:
-        super().setUp()
-        self.pharmacy = PharmacyTestData().create_pharmacy()
-        self.product_ids = ProductTestData().product_ids
-        self.order_data = self.generate_model_data()
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+        cls.pharmacy = PharmacyTestData().create_pharmacy()
+        cls.product_ids = ProductTestData().product_ids
+        cls.order_data = cls.generate_model_data()
 
-    def generate_model_data(self) -> dict:
+    @classmethod
+    def generate_model_data(cls) -> dict:
         model_data = {
-            "order": self._generate_order_data(),
-            "products": self.product_ids,
-            "delivery": self._generate_delivery_data(),
-            "payment": self._generate_payment_data()
+            "order": cls._generate_order_data(),
+            "products": cls.product_ids,
+            "delivery": cls._generate_delivery_data(),
+            "payment": cls._generate_payment_data()
         }
         return model_data
 
-    def _generate_order_data(self) -> dict:
+    @classmethod
+    def _generate_order_data(cls) -> dict:
         order = {
-            "customer": self.customer.id,
-            "pharmacy": self.pharmacy.id
+            "customer": cls.customer.id,
+            "pharmacy": cls.pharmacy.id
         }
         return order
 
-    def _generate_delivery_data(self) -> dict:
+    @staticmethod
+    def _generate_delivery_data() -> dict:
         delivery_data = {"type": Delivery.Type.DELIVERY}
         return delivery_data
 
-    def _generate_payment_data(self) -> dict:
+    @staticmethod
+    def _generate_payment_data() -> dict:
         payment_data = {"type": Payment.Type.CARD, "is_paid": True}
         return payment_data
 
 
 class CustomerTestData:
-    def __init__(self) -> None:
+    def __init__(self, model_data: dict | None = None) -> None:
+        self.model_data = model_data
         self.faker = Faker()
 
-    def create_customer(
-            self, login_data: dict[str, str] | None = None
-    ) -> Customer:
-        login_data = self._generate_login_data_if_not_provided(login_data)
-        customer = self._create_customer_in_db(login_data)
+    def create_customer(self) -> Customer:
+        self._generate_and_set_model_data_if_not_provided()
+        customer = CustomerRepository(self.model_data).create()
         return customer
 
-    def _generate_login_data_if_not_provided(
-            self, login_data: dict[str, str] | None
-    ) -> dict[str, str]:
-        if not login_data:
-            login_data = self.generate_login_data()
-        return login_data
+    def _generate_and_set_model_data_if_not_provided(self) -> None:
+        if not self.model_data:
+            self.model_data = self.generate_login_data()
 
     def generate_login_data(self) -> dict[str, str]:
         login_data = {

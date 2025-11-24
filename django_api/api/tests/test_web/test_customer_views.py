@@ -7,9 +7,10 @@ from django.contrib.auth.password_validation import (
 from rest_framework import status
 
 from utils import (
+    BaseRegistryTest,
+    BaseAuthTest,
     BaseTestWithCreatedCustomer,
     BaseTestWithAuthenticationHeader,
-    BaseRegistryTest,
     BaseLogoutTest,
     BaseViewTest
 )
@@ -19,19 +20,26 @@ from api.web.serializers.customer_serializers import PasswordMatchesValidator
 
 class BaseRegistryViewTest(BaseRegistryTest):
     @override
-    def setUp(self) -> None:
-        super().setUp()
-        self.url = reverse("registry")
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+        cls.url = reverse("registry")
 
 
 class TestRegistry(BaseRegistryViewTest):
+    @override
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+        cls.url = reverse("registry")
+
     def test_returns_201_created_on_success(self) -> None:
-        response = self.client.post(self.url, data=self.data)
+        response = self.client.post(self.url, data=self.customer_data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_creates_customer(self) -> None:
-        self.client.post(self.url, data=self.data)
-        customer_db = Customer.objects.get(email=self.data.get("email"))
+        self.client.post(self.url, data=self.customer_data)
+        customer_db = Customer.objects.get(email=self.customer_data["email"])
         self.assertTrue(customer_db)
 
 
@@ -53,7 +61,7 @@ class TestValidationErrorRender(BaseRegistryViewTest):
 
     def test_returns_validation_err_msg_if_passwords_do_not_match(self) -> None:
         self._validation_err_msg_in_response_content(
-            self.data.get("password"),
+            self.customer_data["password"],
             PasswordMatchesValidator("password"),
             "unmatched_password"
         )
@@ -71,7 +79,7 @@ class TestValidationErrorRender(BaseRegistryViewTest):
         self.assertIn(err_msg, response_content)
 
     def _check_wrong_confirm_password(
-            self, password: str, wrong_confirm_password : str | None = None
+            self, password: str, wrong_confirm_password: str | None = None
     ) -> None:
         if wrong_confirm_password:
             self._update_password(password, wrong_confirm_password)
@@ -79,31 +87,38 @@ class TestValidationErrorRender(BaseRegistryViewTest):
             self._update_password(password, password)
 
     def _update_password(self, password: str, confirm_password: str) -> None:
-        self.data.update({
+        update_data = {
             "password": password, "confirm_password": confirm_password
-        })
+        }
+        self.customer_data.update(update_data)
 
     def _get_response_content(self) -> str:
-        response = self.client.post(self.url, self.data)
+        response = self.client.post(self.url, self.customer_data)
         response_content = response.content.decode("utf-8")
         return response_content
 
 
-class TestLogin(BaseTestWithCreatedCustomer, BaseViewTest):
+class TestLogin(BaseAuthTest, BaseViewTest):
     @override
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+        cls.customer = cls.create_customer(cls.customer_data)
+        cls.url = reverse("login")
+
+    @override  # TODO: remove this
     def setUp(self) -> None:
-        super().setUp()
-        self.url = reverse("login")
+        pass
 
     def test_returns_200_on_succeed(self) -> None:
-        response = self.client.post(self.url, self.data)
+        response = self.client.post(self.url, self.customer_data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_returns_user_with_token(self) -> None:
-        response = self.client.post(self.url, self.data)
+        response = self.client.post(self.url, self.customer_data)
         response_content = self._convert_response_to_json(response)
-        self.assertEqual(response_content.get("email"), self.data.get("email"))
-        self.assertTrue(response_content.get("token"))
+        self.assertEqual(response_content["email"], self.customer_data["email"])
+        self.assertTrue(response_content["token"])
 
 
 class TestCustomerPage(BaseTestWithAuthenticationHeader):

@@ -1,10 +1,12 @@
+from typing import override
+
 from django.db import models
 from django.contrib.auth.models import (
     AbstractBaseUser, PermissionsMixin, BaseUserManager
 )
 from nanoid import generate
 
-from api.data.base_data import FieldDefault
+from api.data.base_data import FieldDefault, BaseRepository
 
 
 def generate_nanoid(size=FieldDefault.nanoid_size):
@@ -36,3 +38,16 @@ class Customer(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self) -> str:
         return f"{self.email}"
+
+
+class CustomerRepository(BaseRepository):
+    @override
+    def __init__(self, model_data: dict, model=Customer) -> None:
+        super().__init__(model, model_data)
+
+    @override
+    def create(self) -> Customer:
+        customer = self.model(email=self.model_data["email"])
+        customer.set_password(self.model_data["password"])
+        customer.save()
+        return customer
