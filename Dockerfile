@@ -1,7 +1,8 @@
 FROM python:3.13.7-slim
 WORKDIR /app
-COPY . .
+COPY pyproject.toml ./
 RUN pip install --upgrade pip
 RUN pip install .
+COPY . .
 EXPOSE 8000
-WORKDIR /app/django_api
+WORKDIR /app/src
