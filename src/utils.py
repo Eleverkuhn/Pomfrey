@@ -16,16 +16,20 @@ from rest_framework.response import Response
 from knox.models import AuthToken
 
 from logger.setup import LoggingConfig
-from api.service.customer_services import RegistryService
-from api.data.base_data import BaseRepository
-from api.data.customer_data import Customer, CustomerRepository
-from api.data.pharmacy_data import (
+from pomfrey_app.services import RegistryService
+from pomfrey_app.models import (
+    Customer,
+    Address,
     Pharmacy,
-    PharmacyRepository,
+    ProductCategory,
+    ProductType,
+    Product,
+    Delivery,
+    Payment
 )
-from api.data.product_data import ProductCategory, ProductType, Product
-from api.data.order_data import Delivery, Payment
-from api.data.geo_data import Address
+from pomfrey_app.model_repositories import (
+    BaseRepository, CustomerRepository, PharmacyRepository
+)
 
 
 class BaseDatabaseTest:

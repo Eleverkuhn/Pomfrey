@@ -44,7 +44,7 @@ services:
     build: .
     env_file:
       - .env
-    command: python manage.py test api.tests
+    command: python manage.py test pomfrey_app.tests
     depends_on:
       migration:
         condition: service_completed_successfully

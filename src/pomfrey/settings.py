@@ -29,7 +29,7 @@ SECRET_KEY = settings.django_key
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["0.0.0.0", "localhost", settings.django_host]
 
 
 # Application definition
@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'knox',
-    'api'
+    'pomfrey_app'
 ]
 
 MIDDLEWARE = [
@@ -93,9 +93,9 @@ DATABASES = {
     }
 }
 
-MIGRATION_MODULES = {
-    "api": "api.data.migrations"
-}
+# MIGRATION_MODULES = {
+#     "api": "api.data.migrations"
+# }
 
 
 # Password validation
@@ -144,7 +144,7 @@ logging_config = LoggingConfig().load()
 logging.config.dictConfig(logging_config)
 
 # auth
-AUTH_USER_MODEL = "api.Customer"
+AUTH_USER_MODEL = "pomfrey_app.Customer"
 
 # REST framework
 REST_FRAMEWORK = {
@@ -155,5 +155,5 @@ REST_FRAMEWORK = {
 
 REST_KNOX = {
     "TOKEN_TTL": timedelta(days=7),
-    "USER_SERIALIZER": "api.serializers.UserSerializer"
+    "USER_SERIALIZER": "pomfrey_app.serializers.UserSerializer"
 }
