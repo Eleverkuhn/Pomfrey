@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     postgres_host: str
     postgres_container_host: str
     postgres_port: str
+
     django_host: str
     django_port: str
     django_key: str
