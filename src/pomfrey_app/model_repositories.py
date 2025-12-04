@@ -84,67 +84,6 @@ class CustomerRepository(BaseRepository):
         return customer
 
 
-class PharmacyRepository(BaseMainRepository[Pharmacy]):
-    @override
-    def __init__(
-            self, model_data: dict, model: type[Pharmacy] = Pharmacy
-    ) -> None:
-        super().__init__(model, model_data)
-
-    @property
-    def schedule_repository(self) -> "PharmacyWorkingScheduleRepository":
-        schedule_repository = PharmacyWorkingScheduleRepository(
-            self.model_data["schedule"], self.model_instance
-        )
-        return schedule_repository
-
-    @override
-    @transaction.atomic
-    def create(self) -> Pharmacy:
-        super().create(self.model_data["pharmacy"])
-        return self.model_instance
-
-    @override
-    def _create_relations(self) -> None:
-        self.schedule_repository.create()
-
-
-class PharmacyRelationRepository(
-        BaseRelationRepository[ModelType], Generic[ModelType]
-):
-    related_field_name = "pharmacy"
-
-    @override
-    def __init__(
-            self,
-            model: type[ModelType],
-            model_data: dict,
-            related_model: Pharmacy,
-            related_field_name: str = "pharmacy"
-    ) -> None:
-        super().__init__(model, model_data, related_model, related_field_name)
-
-
-class PharmacyWorkingScheduleRepository(
-        PharmacyRelationRepository[PharmacyWorkingSchedule]
-):
-    @override
-    def __init__(
-            self,
-            model_data: dict,
-            related_model: Pharmacy,
-            model: type[PharmacyWorkingSchedule] = PharmacyWorkingSchedule
-    ) -> None:
-        super().__init__(model, model_data, related_model)
-
-    @override
-    def create(self) -> PharmacyWorkingSchedule:
-        model = self.model(**self.model_data)
-        model.save()
-        model.pharmacies.set([self.related_model])
-        return model
-
-
 class BaseOrderRelationRepository(BaseRelationRepository[Order]):
     @override
     def __init__(
