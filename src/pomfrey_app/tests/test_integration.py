@@ -4,11 +4,10 @@ import psycopg
 from django.test import TestCase
 from django.db import connection, connections
 from django.db.utils import OperationalError
-from django.urls import reverse
 
 from config import settings
 from logger.setup import LoggingConfig
-from utils import BaseDatabaseTest
+from pomfrey_app.tests.base import BaseDatabaseTest
 
 
 class TestDatabaseConnection(TestCase, BaseDatabaseTest):

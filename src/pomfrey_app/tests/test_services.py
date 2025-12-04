@@ -1,30 +1,12 @@
-from typing import override
-
 from rest_framework.validators import ValidationError
 
-from utils import (
-    BaseTestWithCreatedCustomer,
-    BaseAuthTest,
-    BaseRegistryTest
-)
 from logger.setup import LoggingConfig
-from pomfrey_app.services import LoginService, RegistryService
+from pomfrey_app.services import LoginService
 from pomfrey_app.models import Customer
+from pomfrey_app.tests.base import BaseLoginTest, BaseRegistryTest
 
 
 class TestRegistryService(BaseRegistryTest):
-    # @override
-    # @classmethod
-    # def setUpTestData(cls) -> None:
-    #     super().setUpTestData()
-    #     cls._add_confirm_password_field()
-    #     cls.service = RegistryService(cls.customer_data)
-
-    # @classmethod
-    # def _add_confirm_password_field(cls) -> None:
-    #     update_data = {"confirm_password": cls.customer_data["password"]}
-    #     cls.customer_data.update(update_data)
-
     def test_exec_creates_new_customer(self) -> None:
         email = self.customer_data["email"]
 
@@ -46,14 +28,8 @@ class TestRegistryService(BaseRegistryTest):
         self.assertTrue(cm.exception.get_full_details().get("email"))
 
 
-class TestLoginService(BaseTestWithCreatedCustomer):
-    @override
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
-        cls.service = LoginService(cls.customer_data)
-
+class TestLoginService(BaseLoginTest):
     def test_exec_returns_email_with_auth_token(self) -> None:
-        response_data = self.service.exec()
+        response_data = LoginService(self.customer_data).exec()
         self.assertEqual(response_data["email"], self.customer_data["email"])
         self.assertTrue(response_data["token"])

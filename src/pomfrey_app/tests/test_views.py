@@ -6,15 +6,11 @@ from django.contrib.auth.password_validation import (
     MinimumLengthValidator, CommonPasswordValidator, NumericPasswordValidator
 )
 from rest_framework import status
-from rest_framework.response import Response
 
-from utils import (
+from pomfrey_app.tests.base import (
     BaseRegistryTest,
-    BaseAuthTest,
-    BaseTestWithCreatedCustomer,
-    BaseTestWithAuthenticationHeader,
-    BaseLogoutTest,
-    BaseViewTest,
+    BaseLoginTest,
+    BaseProtectedViewTest,
     BaseOrderTest,
 )
 from pomfrey_app.models import Customer, Order, Delivery
@@ -29,13 +25,20 @@ class BaseRegistryViewTest(BaseRegistryTest):
         cls.url = reverse("registry")
 
 
-class TestRegistry(BaseRegistryViewTest):
-    @override
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
-        cls.url = reverse("registry")
+class BaseLogoutTest(BaseProtectedViewTest):
+    def setUp(self) -> None:
+        self.my_url = reverse("my")
 
+    def _check_auth_token_is_valid(self, url: str, auth_header: str) -> None:
+        response = self.client.get(url, HTTP_AUTHORIZATION=auth_header)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def _check_token_is_removed(self, url: str, auth_header: str) -> None:
+        response = self.client.get(url, HTTP_AUTHORIZATION=auth_header)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class TestRegistryView(BaseRegistryViewTest):
     def test_returns_201_created_on_success(self) -> None:
         response = self.client.post(self.url, data=self.customer_data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -101,30 +104,25 @@ class TestValidationErrorRender(BaseRegistryViewTest):
         return response_content
 
 
-class TestLogin(BaseAuthTest, BaseViewTest):
+class TestLoginView(BaseLoginTest):
     @override
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        cls.customer = cls.create_customer(cls.customer_data)
-        cls.url = reverse("login")
-
-    @override  # TODO: remove this
-    def setUp(self) -> None:
-        pass
+        url = reverse("login")
+        # client = Client()
+        cls.response = cls.client.post(url, cls.customer_data)
 
     def test_returns_200_on_succeed(self) -> None:
-        response = self.client.post(self.url, self.customer_data)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(self.response.status_code, status.HTTP_200_OK)
 
     def test_returns_user_with_token(self) -> None:
-        response = self.client.post(self.url, self.customer_data)
-        response_content = self._convert_response_to_json(response)
+        response_content = self.convert_response_to_json(self.response)
         self.assertEqual(response_content["email"], self.customer_data["email"])
         self.assertTrue(response_content["token"])
 
 
-class TestCustomerPage(BaseTestWithAuthenticationHeader):
+class TestCustomerPage(BaseProtectedViewTest):
     @override
     def setUp(self) -> None:
         super().setUp()
@@ -141,114 +139,80 @@ class TestCustomerPage(BaseTestWithAuthenticationHeader):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
-class TestLogout(BaseTestWithAuthenticationHeader, BaseLogoutTest):
-    @override
-    def setUp(self) -> None:
-        super().setUp()
-        self.url = reverse("logout")
-
+class TestLogoutView(BaseLogoutTest):
     def test_logout_works_as_expected(self) -> None:
-        my_url = reverse("my")
-        self._check_auth_token_is_valid(my_url, self.auth_header)
-        self.client.post(self.url, HTTP_AUTHORIZATION=self.auth_header)
-        self._check_token_is_removed(my_url, self.auth_header)
+        self._check_auth_token_is_valid(self.my_url, self.auth_header)
+        self.client.post(reverse("logout"), HTTP_AUTHORIZATION=self.auth_header)
+        self._check_token_is_removed(self.my_url, self.auth_header)
 
 
-class TestLogoutAll(BaseTestWithCreatedCustomer, BaseLogoutTest):
-    @override
-    def setUp(self) -> None:
-        super().setUp()
-        self.url = reverse("logout_all")
-
+class TestLogoutAll(BaseLogoutTest):
     def test_logout_all_works_as_expected(self) -> None:
         auth_tokens = self._create_multiple_auth_tokens()
         self._check_all_auth_tokens_are_valid(auth_tokens)
 
-        self.client.post(self.url, HTTP_AUTHORIZATION=auth_tokens[0])
+        self.client.post(
+            reverse("logout_all"), HTTP_AUTHORIZATION=auth_tokens[0]
+        )
 
         self._check_all_auth_tokens_are_removed(auth_tokens)
 
     def _create_multiple_auth_tokens(self) -> list[str]:
-        auth_tokens = [self._create_auth_header() for _ in range(5)]
+        auth_tokens = [self.create_auth_header() for _ in range(5)]
         return auth_tokens
 
     def _check_all_auth_tokens_are_valid(
             self, auth_tokens: list[str]
     ) -> None:
         for token in auth_tokens:
-            self._check_auth_token_is_valid(reverse("my"), token)
+            self._check_auth_token_is_valid(self.my_url, token)
 
     def _check_all_auth_tokens_are_removed(
             self, auth_tokens: list[str]
     ) -> None:
         for token in auth_tokens:
-            self._check_token_is_removed(reverse("my"), token)
+            self._check_token_is_removed(self.my_url, token)
 
 
-class TestOrderView(BaseOrderTest, BaseViewTest):
+class TestOrderView(BaseOrderTest):
     @override
-    def setUp(self) -> None:
-        super().setUp()
-        self.url = reverse("order")
-
-    @property
-    def json_order_data(self) -> str:
-        json_order_data = json.dumps(self.order_data)
-        return json_order_data
-
-    def test_returns_201_CREATED_on_success(self) -> None:
-        response = self._send_post_request()
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
-    def test_check_response_content(self) -> None:
-        content = self._get_response_content()
-
-    def _get_response_content(self) -> dict:
-        response = self._send_post_request()
-        response_content = self._convert_response_to_json(response)
-        return response_content
-
-    def _send_post_request(self) -> Response:
-        response = self.client.post(
-            self.url,
-            data=self.json_order_data,
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+        request_data = json.dumps(cls.order_data)
+        cls.response = cls.client.post(
+            reverse("order"),
+            data=request_data,
             content_type="application/json"
         )
-        return response
+        cls.response_content = cls.convert_response_to_json(cls.response)
 
-    def _check_order_id_in_response(self) -> None:
-        content = self._get_response_content()
-        self.assertTrue(content.get("id"))
+    def test_returns_201_CREATED_on_success(self) -> None:
+        self.assertEqual(self.response.status_code, status.HTTP_201_CREATED)
+
+    def test_order_id_in_response(self) -> None:
+        self.assertTrue(self.response_content.get("id"))
 
     def test_customer_in_response(self) -> None:
-        content = self._get_response_content()
-        customer = content["customer"]
-
+        customer = self.response_content["customer"]
         self.assertEqual(customer["id"], self.order_data["order"]["customer"])
-        self.assertEqual(customer["email"], self.customer_data["email"])
+        self.assertEqual(customer["email"], self.customer.email)
 
     def test_status_in_response(self) -> None:
-        content = self._get_response_content()
-        self.assertEqual(content["status"], Order.Status.PENDING)
+        self.assertEqual(self.response_content["status"], Order.Status.PENDING)
 
     def test_pharmacy_in_response(self) -> None:
-        content = self._get_response_content()
-        pharmacy = content["pharmacy"]
+        pharmacy = self.response_content["pharmacy"]
         address = ", ".join(pharmacy["address"].values())
-
         self.assertEqual(pharmacy["phone"], self.pharmacy.phone)
         self.assertEqual(address, self.pharmacy.address.full_address)
 
     def test_delivery_in_response(self) -> None:
-        content = self._get_response_content()
-        delivery = content["delivery"]
-
+        delivery = self.response_content["delivery"]
         self.assertEqual(delivery["type"], self.order_data["delivery"]["type"])
         self.assertEqual(delivery["status"], Delivery.Status.PROCESSING)
 
     def test_payment_in_response(self) -> None:
-        content = self._get_response_content()
-        payment = content["payment"]
-
+        payment = self.response_content["payment"]
         self.assertEqual(payment["type"], self.order_data["payment"]["type"])
         self.assertEqual(payment["is_paid"], True)
