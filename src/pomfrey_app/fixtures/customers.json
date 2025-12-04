@@ -1,0 +1,18 @@
+[
+  {
+    "model": "pomfrey_app.customer",
+    "pk": "N5QDXIQ8R_",
+    "fields": {
+      "email": "user1@example.com",
+      "password": "pbkdf2_sha256$1000000$qjbUEgSM1fEJpkx4n9bVzn$zZQjLDxWKEGwPPog1mFkW7qf4vTKCpiYEZqbc61HU/Q="
+    }
+  },
+  {
+    "model": "pomfrey_app.customer",
+    "pk": "mG73lOZxZj",
+    "fields": {
+      "email": "user2@example.com",
+      "password": "pbkdf2_sha256$1000000$rpDz402P5XMi0U4SpSD57o$0Z9Bf0Q58GPM3qfQJcIEXrW0V2XjrPsw04gDgo21CQg="
+    }
+  }
+]

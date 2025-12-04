@@ -1,0 +1,132 @@
+[
+  {
+    "model": "pomfrey_app.producttype",
+    "pk": 1,
+    "fields": {"title": "Antiseptic", "categories": [7]}
+  },
+  {
+    "model": "pomfrey_app.producttype",
+    "pk": 2,
+    "fields": {"title": "Bandages", "categories": [7]}
+  },
+  {
+    "model": "pomfrey_app.producttype",
+    "pk": 3,
+    "fields": {"title": "Capsules", "categories": [14]}
+  },
+  {
+    "model": "pomfrey_app.producttype",
+    "pk": 4,
+    "fields": {"title": "Cream", "categories": [13]}
+  },
+  {
+    "model": "pomfrey_app.producttype",
+    "pk": 5,
+    "fields": {"title": "Dental Floss", "categories": [10]}
+  },
+  {
+    "model": "pomfrey_app.producttype",
+    "pk": 6,
+    "fields": {"title": "Deodorant", "categories": [12]}
+  },
+  {
+    "model": "pomfrey_app.producttype",
+    "pk": 7,
+    "fields": {"title": "Eye Drops", "categories": [6]}
+  },
+  {
+    "model": "pomfrey_app.producttype",
+    "pk": 8,
+    "fields": {"title": "Gel", "categories": [13]}
+  },
+  {
+    "model": "pomfrey_app.producttype",
+    "pk": 9,
+    "fields": {"title": "Gauze", "categories": [7]}
+  },
+  {
+    "model": "pomfrey_app.producttype",
+    "pk": 10,
+    "fields": {"title": "Gummies", "categories": [14]}
+  },
+  {
+    "model": "pomfrey_app.producttype",
+    "pk": 11,
+    "fields": {"title": "Liquid", "categories": [14]}
+  },
+  {
+    "model": "pomfrey_app.producttype",
+    "pk": 12,
+    "fields": {"title": "Lozenges", "categories": [3]}
+  },
+  {
+    "model": "pomfrey_app.producttype",
+    "pk": 13,
+    "fields": {"title": "Mouthwash", "categories": [10]}
+  },
+  {
+    "model": "pomfrey_app.producttype",
+    "pk": 14,
+    "fields": {"title": "Nasal Spray", "categories": [3]}
+  },
+  {
+    "model": "pomfrey_app.producttype",
+    "pk": 15,
+    "fields": {"title": "Ointment", "categories": [13]}
+  },
+  {
+    "model": "pomfrey_app.producttype",
+    "pk": 16,
+    "fields": {"title": "Patch", "categories": [7]}
+  },
+  {
+    "model": "pomfrey_app.producttype",
+    "pk": 17,
+    "fields": {"title": "Powder", "categories": [13]}
+  },
+  {
+    "model": "pomfrey_app.producttype",
+    "pk": 18,
+    "fields": {"title": "Probiotics", "categories": [14]}
+  },
+  {
+    "model": "pomfrey_app.producttype",
+    "pk": 19,
+    "fields": {"title": "Shampoo", "categories": [12]}
+  },
+  {
+    "model": "pomfrey_app.producttype",
+    "pk": 20,
+    "fields": {"title": "Soap", "categories": [12]}
+  },
+  {
+    "model": "pomfrey_app.producttype",
+    "pk": 21,
+    "fields": {"title": "Solution", "categories": [14]}
+  },
+  {
+    "model": "pomfrey_app.producttype",
+    "pk": 22,
+    "fields": {"title": "Spray", "categories": [3]}
+  },
+  {
+    "model": "pomfrey_app.producttype",
+    "pk": 23,
+    "fields": {"title": "Syrup", "categories": [14]}
+  },
+  {
+    "model": "pomfrey_app.producttype",
+    "pk": 24,
+    "fields": {"title": "Tablets", "categories": [14, 11]}
+  },
+  {
+    "model": "pomfrey_app.producttype",
+    "pk": 25,
+    "fields": {"title": "Toothpaste", "categories": [10]}
+  },
+  {
+    "model": "pomfrey_app.producttype",
+    "pk": 26,
+    "fields": {"title": "Wipes", "categories": [12]}
+  }
+]

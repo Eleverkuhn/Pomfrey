@@ -1,0 +1,107 @@
+[
+  {
+    "model": "pomfrey_app.productcategory",
+    "pk": 1,
+    "fields": {
+      "title": "Allergy"
+    }
+  },
+  {
+    "model": "pomfrey_app.productcategory",
+    "pk": 2,
+    "fields": {
+      "title": "Baby Care"
+    }
+  },
+  {
+    "model": "pomfrey_app.productcategory",
+    "pk": 3,
+    "fields": {
+      "title": "Cold & Flu"
+    }
+  },
+  {
+    "model": "pomfrey_app.productcategory",
+    "pk": 4,
+    "fields": {
+      "title": "Digestive Health"
+    }
+  },
+  {
+    "model": "pomfrey_app.productcategory",
+    "pk": 5,
+    "fields": {
+      "title": "Diabetes Care"
+    }
+  },
+  {
+    "model": "pomfrey_app.productcategory",
+    "pk": 6,
+    "fields": {
+      "title": "Eye Care"
+    }
+  },
+  {
+    "model": "pomfrey_app.productcategory",
+    "pk": 7,
+    "fields": {
+      "title": "First Aid"
+    }
+  },
+  {
+    "model": "pomfrey_app.productcategory",
+    "pk": 8,
+    "fields": {
+      "title": "Heart Health"
+    }
+  },
+  {
+    "model": "pomfrey_app.productcategory",
+    "pk": 9,
+    "fields": {
+      "title": "Men’s Health"
+    }
+  },
+  {
+    "model": "pomfrey_app.productcategory",
+    "pk": 10,
+    "fields": {
+      "title": "Oral Care"
+    }
+  },
+  {
+    "model": "pomfrey_app.productcategory",
+    "pk": 11,
+    "fields": {
+      "title": "Pain Relief"
+    }
+  },
+  {
+    "model": "pomfrey_app.productcategory",
+    "pk": 12,
+    "fields": {
+      "title": "Personal Care"
+    }
+  },
+  {
+    "model": "pomfrey_app.productcategory",
+    "pk": 13,
+    "fields": {
+      "title": "Skin Care"
+    }
+  },
+  {
+    "model": "pomfrey_app.productcategory",
+    "pk": 14,
+    "fields": {
+      "title": "Vitamins & Supplements"
+    }
+  },
+  {
+    "model": "pomfrey_app.productcategory",
+    "pk": 15,
+    "fields": {
+      "title": "Women’s Health"
+    }
+  }
+]

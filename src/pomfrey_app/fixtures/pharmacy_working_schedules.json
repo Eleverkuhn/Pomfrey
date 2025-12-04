@@ -1,0 +1,11 @@
+[
+  {
+    "model": "pomfrey_app.pharmacyworkingschedule",
+    "pk": 1,
+    "fields": {
+      "start_time": "08:00:00",
+      "end_time": "20:00:00",
+      "pharmacies": [1, 2]
+    }
+  }
+]

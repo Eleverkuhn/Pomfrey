@@ -24,7 +24,7 @@ class FieldDefault:
     postal_code_length: int = 8
 
 
-def generate_nanoid(size=FieldDefault.nanoid_size):
+def generate_nanoid(size=FieldDefault.nanoid_size):  # TODO: redundant function, probably need to remove it
     return generate(size=size)
 
 

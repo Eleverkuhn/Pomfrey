@@ -1,0 +1,18 @@
+[
+  {
+    "model": "pomfrey_app.pharmacy",
+    "pk": 1,
+    "fields": {
+      "phone": "12125550147",
+      "address": 1
+    }
+  },
+  {
+    "model": "pomfrey_app.pharmacy",
+    "pk": 2,
+    "fields": {
+      "phone": "14155550198",
+      "address": 2
+    }
+  }
+]

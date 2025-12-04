@@ -1,0 +1,24 @@
+[
+  {
+    "model": "pomfrey_app.address",
+    "pk": 1,
+    "fields": {
+      "region": "California",
+      "city": "Los Angeles",
+      "street": "123 Sunset Blvd",
+      "apartment": "Apt 101",
+      "postal_code": "90026"
+    }
+  },
+  {
+    "model": "pomfrey_app.address",
+    "pk": 2,
+    "fields": {
+      "region": "New York",
+      "city": "New York",
+      "street": "456 Broadway",
+      "apartment": "Suite 12B",
+      "postal_code": "10012"
+    }
+  }
+]
